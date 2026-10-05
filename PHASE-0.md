@@ -3,11 +3,13 @@
 Trạng thái: **đã implement và CHẠY THẬT**. Toàn bộ definition of done đã kiểm chứng trên máy.
 
 ```
-pnpm build        5/5 xanh
-pnpm typecheck    7/7 xanh
-pnpm test         22/22 xanh   (transaction thật trên MongoDB replica set)
-pnpm smoke        10/10 đạt    (chạy trên hạ tầng Docker thật)
-Jaeger            trace LIỀN MẠCH qua cả 3 service — đã xác minh
+pnpm build              5/5 xanh
+pnpm lint               5/5 xanh    (rào chắn kiến trúc đã kiểm chứng là CHẶN thật)
+pnpm typecheck          7/7 xanh
+pnpm test               22/22 xanh  (transaction thật trên MongoDB replica set)
+pnpm smoke              10/10 đạt   (hạ tầng Docker thật)
+pnpm verify:idempotency ĐẠT         (gửi lại event 3 lần -> không nhân bản)
+Jaeger                  trace LIỀN MẠCH qua 3 service — đã xác minh
 ```
 
 Phase này không ra tính năng nào cho người dùng. Nó dựng đường dây mà **mọi service sau đều đi qua** — làm ẩu ở đây thì 17 tuần sau trả giá gấp nhiều lần.
@@ -97,26 +99,41 @@ Walking skeleton — **sẽ xóa ở Phase 1**. Tồn tại để chứng minh �
 ## 3. Kiểm chứng
 
 ```bash
-pnpm typecheck    # 7/7
-pnpm test         # 22/22
-pnpm smoke        # cần hạ tầng + service đang chạy
+pnpm lint                # rào chắn kiến trúc
+pnpm typecheck
+pnpm test                # không cần hạ tầng
+pnpm smoke               # cần hạ tầng + service đang chạy
+pnpm verify:idempotency  # cần hạ tầng + service đang chạy
 ```
+
+### Rào chắn kiến trúc — đã kiểm chứng
+
+Thử import chéo service, ESLint chặn thật:
+
+```
+'../../ping-service/src/echo/echo.service' import is restricted.
+Service không được import service khác. Dùng RpcClient (sync) hoặc @OnEvent (async)
+```
+
+Đây là khác biệt giữa "ranh giới trên giấy" và "ranh giới không lách được".
 
 Test tích hợp chạy trên **MongoDB replica set thật** (`mongodb-memory-server`), không phải mock — vì toàn bộ giá trị của outbox nằm ở transaction, mà standalone MongoDB không có transaction. Test trên standalone sẽ "xanh" vì không có gì chạy cả.
 
 Những gì đã verify:
 
-| Test                          | Chứng minh                                                 |
-| ----------------------------- | ---------------------------------------------------------- |
-| outbox: ghi chung transaction | Dữ liệu + event cùng commit                                |
-| outbox: rollback              | Lỗi sau khi ghi → **không có event mồ côi**                |
-| outbox: claim song song       | 2 relay không giành cùng một event                         |
-| outbox: thu hồi bản ghi kẹt   | Relay chết giữa chừng vẫn hồi được                         |
-| idempotency: giao lại         | Tác dụng phụ chỉ chạy một lần                              |
-| **idempotency: song song**    | Bắt lỗi `findOne`-rồi-`insert` mà test tuần tự luôn bỏ lọt |
-| idempotency: handler lỗi      | Rollback cả `processedEvents` → giao lại vẫn xử lý được    |
-| out-of-order                  | Event cũ không ghi đè dữ liệu mới                          |
-| circuit breaker (10 ca)       | Mở/half-open/đóng, chặn thật, chỉ 1 request thử            |
+| Test                               | Chứng minh                                                 |
+| ---------------------------------- | ---------------------------------------------------------- |
+| outbox: ghi chung transaction      | Dữ liệu + event cùng commit                                |
+| outbox: rollback                   | Lỗi sau khi ghi → **không có event mồ côi**                |
+| outbox: claim song song            | 2 relay không giành cùng một event                         |
+| outbox: thu hồi bản ghi kẹt        | Relay chết giữa chừng vẫn hồi được                         |
+| idempotency: giao lại              | Tác dụng phụ chỉ chạy một lần                              |
+| **idempotency: song song**         | Bắt lỗi `findOne`-rồi-`insert` mà test tuần tự luôn bỏ lọt |
+| **redelivery trên hệ thống thật**  | Gửi lại cùng event 3 lần qua JetStream -> 0 bản ghi mới    |
+| **consumer chết, event không mất** | Tắt pong-service, gửi 3 event, bật lại -> nhận đủ          |
+| idempotency: handler lỗi           | Rollback cả `processedEvents` → giao lại vẫn xử lý được    |
+| out-of-order                       | Event cũ không ghi đè dữ liệu mới                          |
+| circuit breaker (10 ca)            | Mở/half-open/đóng, chặn thật, chỉ 1 request thử            |
 
 ### Việc PHẢI tự kiểm tra bằng mắt
 
