@@ -26,8 +26,10 @@ tmp/
 # Artifact build lọt vào src/ (chạy tsc sai thư mục)
 apps/*/src/**/*.js
 apps/*/src/**/*.d.ts
+apps/*/src/**/*.map
 packages/*/src/**/*.js
 packages/*/src/**/*.d.ts
+packages/*/src/**/*.map
 !packages/config-eslint/index.js
 
 # Dump database — file nhị phân, phình nhanh, có thể chứa dữ liệu nhạy cảm
