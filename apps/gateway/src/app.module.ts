@@ -5,6 +5,7 @@ import { AuthController } from './auth/auth.controller';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { ProfileController } from './profiles/profile.controller';
 import { OAuthController } from './auth/oauth.controller';
+import { PasswordController } from './auth/password.controller';
 import { RequestContextMiddleware } from './common/request-context.middleware';
 import { GatewayHealthController } from './health/gateway-health.controller';
 import { PingController } from './ping/ping.controller';
@@ -26,6 +27,7 @@ import { PingController } from './ping/ping.controller';
     AuthController,
     ProfileController,
     OAuthController,
+    PasswordController,
   ],
   // Guard TOÀN CỤC: mặc định MỌI route cần đăng nhập.
   // Route công khai phải đánh dấu @Public() tường minh.

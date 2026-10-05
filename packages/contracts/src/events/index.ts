@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import { pingEchoCreatedV1 } from './ping';
 import {
+  passwordResetRequestedV1,
   profileCreatedV1,
   profileDeletedV1,
   securityAlertV1,
@@ -29,6 +30,7 @@ export const EVENT_REGISTRY = {
   'identity.security.alert': { version: 1, schema: securityAlertV1 },
   'identity.profile.created': { version: 1, schema: profileCreatedV1 },
   'identity.profile.deleted': { version: 1, schema: profileDeletedV1 },
+  'identity.password.reset_requested': { version: 1, schema: passwordResetRequestedV1 },
 } as const;
 
 export type EventRegistry = typeof EVENT_REGISTRY;

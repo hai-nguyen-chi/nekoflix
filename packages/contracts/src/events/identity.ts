@@ -84,3 +84,21 @@ export const profileDeletedV1 = z.object({
   deletedAt: z.string().datetime(),
 });
 export type ProfileDeletedV1 = z.infer<typeof profileDeletedV1>;
+
+/**
+ * Người dùng yêu cầu đặt lại mật khẩu.
+ *
+ * notification-service nghe event này để gửi email. Token THÔ đi trong
+ * payload vì consumer cần nó để dựng link — event chỉ chạy trong mạng
+ * nội bộ và token sống 1 giờ.
+ */
+export const passwordResetRequestedV1 = z.object({
+  userId: z.string(),
+  email: z.string(),
+  displayName: z.string(),
+  resetToken: z.string(),
+  expiresAt: z.string().datetime(),
+  ip: z.string(),
+  requestedAt: z.string().datetime(),
+});
+export type PasswordResetRequestedV1 = z.infer<typeof passwordResetRequestedV1>;

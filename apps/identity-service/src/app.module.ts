@@ -4,9 +4,11 @@ import { ServiceKitModule } from '@nekoflix/service-kit';
 import { AuthController } from './api/auth.controller';
 import { ProfileController } from './api/profile.controller';
 import { OAuthController } from './api/oauth.controller';
+import { PasswordController } from './api/password.controller';
 import { AuthService } from './application/auth.service';
 import { ProfileService } from './application/profile.service';
 import { OAuthService } from './application/oauth.service';
+import { PasswordResetService } from './application/password.service';
 import { GoogleProvider } from './domain/providers/google.provider';
 import { GitHubProvider } from './domain/providers/github.provider';
 import { PasswordService } from './domain/password.service';
@@ -45,11 +47,12 @@ import {
       { name: VerificationToken.name, schema: VerificationTokenSchema },
     ]),
   ],
-  controllers: [AuthController, ProfileController, OAuthController],
+  controllers: [AuthController, ProfileController, OAuthController, PasswordController],
   providers: [
     AuthService,
     ProfileService,
     OAuthService,
+    PasswordResetService,
     PasswordService,
     TokenService,
     GoogleProvider,
