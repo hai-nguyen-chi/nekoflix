@@ -61,3 +61,26 @@ export const securityAlertV1 = z.object({
   occurredAt: z.string().datetime(),
 });
 export type SecurityAlertV1 = z.infer<typeof securityAlertV1>;
+
+export const profileCreatedV1 = z.object({
+  profileId: z.string(),
+  userId: z.string(),
+  name: z.string(),
+  isKid: z.boolean(),
+  createdAt: z.string().datetime(),
+});
+export type ProfileCreatedV1 = z.infer<typeof profileCreatedV1>;
+
+/**
+ * Xoá profile.
+ *
+ * activity-service và reco-service NGHE event này để dọn dữ liệu của
+ * profile đó (tiến độ xem, watchlist, vector sở thích). Chúng không thể
+ * tự biết — identity không được đụng vào database của chúng (ADR-012).
+ */
+export const profileDeletedV1 = z.object({
+  profileId: z.string(),
+  userId: z.string(),
+  deletedAt: z.string().datetime(),
+});
+export type ProfileDeletedV1 = z.infer<typeof profileDeletedV1>;

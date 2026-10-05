@@ -20,6 +20,7 @@ import type {
 import { AppError, OutboxService, getLogger } from '@nekoflix/service-kit';
 import { User, type UserDocument } from '../persistence/schemas/user.schema';
 import { Session } from '../persistence/schemas/session.schema';
+import { Profile } from '../persistence/schemas/profile.schema';
 import { VerificationToken } from '../persistence/schemas/verification-token.schema';
 import { PasswordService } from '../domain/password.service';
 import { TokenService } from '../domain/token.service';
@@ -42,6 +43,7 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly users: Model<User>,
     @InjectModel(Session.name) private readonly sessions: Model<Session>,
+    @InjectModel(Profile.name) private readonly profiles: Model<Profile>,
     @InjectModel(VerificationToken.name) private readonly verifications: Model<VerificationToken>,
     private readonly passwords: PasswordService,
     private readonly tokens: TokenService,
@@ -88,7 +90,36 @@ export class AuthService {
         { session },
       );
 
+      // Profile mặc định, tạo CÙNG transaction với user.
+      //
+      // Không ai nên vào được app mà không có profile nào: mọi dữ liệu cá
+      // nhân hoá (tiến độ xem, watchlist) gắn với profile, nên user không
+      // profile là trạng thái cụt không làm được gì.
+      const [profile] = await this.profiles.create(
+        [
+          {
+            userId: user.id as string,
+            name: input.displayName.slice(0, 20),
+            avatarKey: 'avatar-01',
+          },
+        ],
+        { session },
+      );
+      if (!profile) throw AppError.internal();
+
       const tokens = await this.issueNewFamily(user, input.ctx, session);
+
+      await this.outbox.publish(
+        'identity.profile.created',
+        {
+          profileId: profile._id.toString(),
+          userId: user.id as string,
+          name: profile.name,
+          isKid: false,
+          createdAt: profile.createdAt.toISOString(),
+        },
+        { session },
+      );
 
       await this.outbox.publish(
         'identity.user.registered',

@@ -2,11 +2,14 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ServiceKitModule } from '@nekoflix/service-kit';
 import { AuthController } from './api/auth.controller';
+import { ProfileController } from './api/profile.controller';
 import { AuthService } from './application/auth.service';
+import { ProfileService } from './application/profile.service';
 import { PasswordService } from './domain/password.service';
 import { TokenService } from './domain/token.service';
 import { User, UserSchema } from './persistence/schemas/user.schema';
 import { Session, SessionSchema } from './persistence/schemas/session.schema';
+import { Profile, ProfileSchema } from './persistence/schemas/profile.schema';
 import {
   VerificationToken,
   VerificationTokenSchema,
@@ -26,10 +29,11 @@ import {
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Session.name, schema: SessionSchema },
+      { name: Profile.name, schema: ProfileSchema },
       { name: VerificationToken.name, schema: VerificationTokenSchema },
     ]),
   ],
-  controllers: [AuthController],
-  providers: [AuthService, PasswordService, TokenService],
+  controllers: [AuthController, ProfileController],
+  providers: [AuthService, ProfileService, PasswordService, TokenService],
 })
 export class AppModule {}

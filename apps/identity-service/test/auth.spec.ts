@@ -8,6 +8,7 @@ import { PasswordService } from '../src/domain/password.service';
 import { TokenService } from '../src/domain/token.service';
 import { User, UserSchema } from '../src/persistence/schemas/user.schema';
 import { Session, SessionSchema } from '../src/persistence/schemas/session.schema';
+import { Profile, ProfileSchema } from '../src/persistence/schemas/profile.schema';
 import {
   VerificationToken,
   VerificationTokenSchema,
@@ -25,6 +26,7 @@ let replSet: MongoMemoryReplSet;
 let Users: Model<User>;
 let Sessions: Model<Session>;
 let Verifications: Model<VerificationToken>;
+let Profiles: Model<Profile>;
 let auth: AuthService;
 let tokens: TokenService;
 const published: { type: string; data: Record<string, unknown> }[] = [];
@@ -50,6 +52,7 @@ beforeAll(async () => {
     VerificationToken.name,
     VerificationTokenSchema,
   );
+  Profiles = mongoose.model<Profile>(Profile.name, ProfileSchema);
   await Promise.all([
     Users.createIndexes(),
     Sessions.createIndexes(),
@@ -81,6 +84,7 @@ beforeAll(async () => {
   auth = new AuthService(
     Users,
     Sessions,
+    Profiles,
     Verifications,
     new PasswordService(),
     tokens,

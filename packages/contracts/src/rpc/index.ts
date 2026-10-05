@@ -23,9 +23,26 @@ import {
   verifyEmailRequest,
   verifyEmailResponse,
 } from './identity';
+import {
+  createProfileRequest,
+  deleteProfileRequest,
+  deleteProfileResponse,
+  listProfilesRequest,
+  listProfilesResponse,
+  okResponse,
+  profileResponse,
+  removePinRequest,
+  selectProfileRequest,
+  selectProfileResponse,
+  setPinRequest,
+  updateProfileRequest,
+  verifyProfileRequest,
+  verifyProfileResponse,
+} from './profile';
 
 export * from './ping';
 export * from './identity';
+export * from './profile';
 
 const empty = { parse: (v: unknown) => v } as unknown as z.ZodType<Record<string, never>>;
 
@@ -49,6 +66,15 @@ export const RPC_REGISTRY = {
   'identity.auth.verifyEmail': { request: verifyEmailRequest, response: verifyEmailResponse },
   'identity.user.get': { request: getUserRequest, response: getUserResponse },
   'identity.session.list': { request: listSessionsRequest, response: listSessionsResponse },
+
+  'identity.profile.list': { request: listProfilesRequest, response: listProfilesResponse },
+  'identity.profile.create': { request: createProfileRequest, response: profileResponse },
+  'identity.profile.update': { request: updateProfileRequest, response: profileResponse },
+  'identity.profile.delete': { request: deleteProfileRequest, response: deleteProfileResponse },
+  'identity.profile.select': { request: selectProfileRequest, response: selectProfileResponse },
+  'identity.profile.setPin': { request: setPinRequest, response: okResponse },
+  'identity.profile.removePin': { request: removePinRequest, response: okResponse },
+  'identity.profile.verify': { request: verifyProfileRequest, response: verifyProfileResponse },
 } as const;
 
 export type RpcRegistry = typeof RPC_REGISTRY;
