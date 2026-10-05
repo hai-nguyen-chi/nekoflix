@@ -415,6 +415,40 @@ export class AuthService {
     });
   }
 
+  /**
+   * Cấp một phiên mới (dùng cho đăng nhập OAuth).
+   *
+   * Tự mở transaction vì OAuth gọi từ ngoài, không nằm sẵn trong một
+   * transaction nào.
+   */
+  async issueSessionFor(user: UserDocument, ctx: AuthContext): Promise<AuthTokens> {
+    return this.outbox.withTransaction(async (session) => {
+      const tokens = await this.issueNewFamily(user, ctx, session);
+
+      user.lastLoginAt = new Date();
+      user.knownDevices = [
+        deviceFingerprint(ctx.userAgent),
+        ...user.knownDevices.filter((d) => d !== deviceFingerprint(ctx.userAgent)),
+      ].slice(0, MAX_KNOWN_DEVICES);
+      await user.save({ session });
+
+      await this.outbox.publish(
+        'identity.user.logged_in',
+        {
+          userId: user.id as string,
+          email: user.email,
+          deviceLabel: deviceLabel(ctx.userAgent),
+          ip: ctx.ip,
+          isNewDevice: false,
+          loggedInAt: new Date().toISOString(),
+        },
+        { session },
+      );
+
+      return tokens;
+    });
+  }
+
   // ───────────────────────────────────────────────────────────────
   private async issueNewFamily(
     user: UserDocument,

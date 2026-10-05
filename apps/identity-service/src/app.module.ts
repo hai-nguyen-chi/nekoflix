@@ -3,13 +3,23 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ServiceKitModule } from '@nekoflix/service-kit';
 import { AuthController } from './api/auth.controller';
 import { ProfileController } from './api/profile.controller';
+import { OAuthController } from './api/oauth.controller';
 import { AuthService } from './application/auth.service';
 import { ProfileService } from './application/profile.service';
+import { OAuthService } from './application/oauth.service';
+import { GoogleProvider } from './domain/providers/google.provider';
+import { GitHubProvider } from './domain/providers/github.provider';
 import { PasswordService } from './domain/password.service';
 import { TokenService } from './domain/token.service';
 import { User, UserSchema } from './persistence/schemas/user.schema';
 import { Session, SessionSchema } from './persistence/schemas/session.schema';
 import { Profile, ProfileSchema } from './persistence/schemas/profile.schema';
+import {
+  OAuthExchangeCode,
+  OAuthExchangeCodeSchema,
+  OAuthState,
+  OAuthStateSchema,
+} from './persistence/schemas/oauth-state.schema';
 import {
   VerificationToken,
   VerificationTokenSchema,
@@ -30,10 +40,20 @@ import {
       { name: User.name, schema: UserSchema },
       { name: Session.name, schema: SessionSchema },
       { name: Profile.name, schema: ProfileSchema },
+      { name: OAuthState.name, schema: OAuthStateSchema },
+      { name: OAuthExchangeCode.name, schema: OAuthExchangeCodeSchema },
       { name: VerificationToken.name, schema: VerificationTokenSchema },
     ]),
   ],
-  controllers: [AuthController, ProfileController],
-  providers: [AuthService, ProfileService, PasswordService, TokenService],
+  controllers: [AuthController, ProfileController, OAuthController],
+  providers: [
+    AuthService,
+    ProfileService,
+    OAuthService,
+    PasswordService,
+    TokenService,
+    GoogleProvider,
+    GitHubProvider,
+  ],
 })
 export class AppModule {}

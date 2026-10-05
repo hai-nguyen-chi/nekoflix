@@ -31,6 +31,26 @@ export class User {
   lastLoginAt!: Date | null;
 
   /**
+   * Các nhà cung cấp OAuth đã liên kết.
+   *
+   * Embed thay vì tách collection: tối đa vài phần tử, và LUÔN đọc cùng
+   * user. Index unique trên (provider, providerUserId) chặn một tài khoản
+   * Google liên kết vào hai tài khoản Nekoflix khác nhau.
+   */
+  @Prop({
+    type: [
+      {
+        provider: { type: String, required: true },
+        providerUserId: { type: String, required: true },
+        email: { type: String, required: true },
+        linkedAt: { type: Date, required: true },
+      },
+    ],
+    default: [],
+  })
+  oauthAccounts!: { provider: string; providerUserId: string; email: string; linkedAt: Date }[];
+
+  /**
    * Vân tay các thiết bị đã từng đăng nhập thành công.
    *
    * Dùng để phát hiện "đăng nhập từ thiết bị mới" và gửi mail cảnh báo.
@@ -51,3 +71,7 @@ export type UserDocument = HydratedDocument<User>;
 export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.index({ role: 1, status: 1 });
+UserSchema.index(
+  { 'oauthAccounts.provider': 1, 'oauthAccounts.providerUserId': 1 },
+  { unique: true, sparse: true },
+);

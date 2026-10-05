@@ -20,6 +20,7 @@
     "@nestjs/mongoose": "^11.0.0",
     "@nestjs/platform-express": "^11.0.1",
     "@node-rs/argon2": "^2.0.2",
+    "jose": "^5.9.6",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.2",
     "nats": "^2.29.1",

@@ -4,6 +4,7 @@ import { ServiceKitModule } from '@nekoflix/service-kit';
 import { AuthController } from './auth/auth.controller';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { ProfileController } from './profiles/profile.controller';
+import { OAuthController } from './auth/oauth.controller';
 import { RequestContextMiddleware } from './common/request-context.middleware';
 import { GatewayHealthController } from './health/gateway-health.controller';
 import { PingController } from './ping/ping.controller';
@@ -19,7 +20,13 @@ import { PingController } from './ping/ping.controller';
       consumeEvents: false,
     }),
   ],
-  controllers: [GatewayHealthController, PingController, AuthController, ProfileController],
+  controllers: [
+    GatewayHealthController,
+    PingController,
+    AuthController,
+    ProfileController,
+    OAuthController,
+  ],
   // Guard TOÀN CỤC: mặc định MỌI route cần đăng nhập.
   // Route công khai phải đánh dấu @Public() tường minh.
   //

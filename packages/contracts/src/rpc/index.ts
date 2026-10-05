@@ -39,10 +39,23 @@ import {
   verifyProfileRequest,
   verifyProfileResponse,
 } from './profile';
+import {
+  listLinkedRequest,
+  listLinkedResponse,
+  oauthCallbackRequest,
+  oauthCallbackResponse,
+  oauthExchangeRequest,
+  oauthExchangeResponse,
+  oauthStartRequest,
+  oauthStartResponse,
+  unlinkRequest,
+  unlinkResponse,
+} from './oauth';
 
 export * from './ping';
 export * from './identity';
 export * from './profile';
+export * from './oauth';
 
 const empty = { parse: (v: unknown) => v } as unknown as z.ZodType<Record<string, never>>;
 
@@ -75,6 +88,12 @@ export const RPC_REGISTRY = {
   'identity.profile.setPin': { request: setPinRequest, response: okResponse },
   'identity.profile.removePin': { request: removePinRequest, response: okResponse },
   'identity.profile.verify': { request: verifyProfileRequest, response: verifyProfileResponse },
+
+  'identity.oauth.start': { request: oauthStartRequest, response: oauthStartResponse },
+  'identity.oauth.callback': { request: oauthCallbackRequest, response: oauthCallbackResponse },
+  'identity.oauth.exchange': { request: oauthExchangeRequest, response: oauthExchangeResponse },
+  'identity.oauth.listLinked': { request: listLinkedRequest, response: listLinkedResponse },
+  'identity.oauth.unlink': { request: unlinkRequest, response: unlinkResponse },
 } as const;
 
 export type RpcRegistry = typeof RPC_REGISTRY;

@@ -26,7 +26,8 @@
     "db:export": "tsx scripts/db-sync.ts export",
     "db:import": "tsx scripts/db-sync.ts import",
     "db:list": "tsx scripts/db-sync.ts list",
-    "db:seed": "tsx scripts/seed/index.ts"
+    "db:seed": "tsx scripts/seed/index.ts",
+    "dev:identity": "turbo run dev --filter=gateway --filter=identity-service"
   },
   "devDependencies": {
     "@types/node": "^20.17.10",
