@@ -68,6 +68,8 @@ Mỗi service sở hữu database riêng, không ai đọc DB của ai. Ghi DB +
 ## Bắt đầu
 
 > **Mới vào dự án?** Đọc [GETTING-STARTED.md](GETTING-STARTED.md) — hướng dẫn từng bước từ số 0, kể cả cài Docker.
+>
+> **Đã cài xong, cần tra lệnh?** [COMMANDS.md](COMMANDS.md) — sổ tay lệnh + xử lý lỗi.
 
 Xem [docs/10-devops-setup.md](docs/10-devops-setup.md).
 

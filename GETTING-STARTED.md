@@ -432,6 +432,8 @@ curl localhost:4000/v1/ping/received
 
 ## Phần 6 — Các lệnh hay dùng
 
+> Bảng đầy đủ hơn + cách xử lý lỗi: [COMMANDS.md](COMMANDS.md)
+
 ```bash
 # Hạ tầng
 pnpm infra:up         # bật mongo, redis, nats, storage, jaeger, mailpit
