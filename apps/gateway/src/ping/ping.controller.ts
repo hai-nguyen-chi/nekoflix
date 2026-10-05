@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { createEchoRequest, pingRequest } from '@nekoflix/contracts';
 import { RpcClient, zodPipe } from '@nekoflix/service-kit';
+import { Public } from '../auth/jwt.guard';
 
 /**
  * Walking skeleton của Phase 0.
@@ -9,6 +10,8 @@ import { RpcClient, zodPipe } from '@nekoflix/service-kit';
  * và ghép dữ liệu. Mỗi khi định viết `if` nghiệp vụ ở đây, hãy hỏi: logic
  * này thuộc về service nào?
  */
+// Giàn giáo Phase 0 — xoá cùng ping-service
+@Public()
 @Controller('v1/ping')
 export class PingController {
   constructor(private readonly rpc: RpcClient) {}

@@ -155,22 +155,42 @@ apps/<name>-service/
 ### Phân lớp
 
 ```
-api/          → biên NATS: parse payload, gọi domain, map lỗi.
+api/          → biên NATS: parse payload, gọi application, map lỗi.
                 KHÔNG chứa business logic.
 
-events/       → biên event: idempotency, ack, gọi domain.
+events/       → biên event: idempotency, ack, gọi application.
                 KHÔNG chứa business logic.
 
-domain/       → toàn bộ business logic. KHÔNG biết NATS, KHÔNG biết Mongoose.
-                Đây là nơi chứa giá trị thật và là nơi dễ test nhất.
+application/  → ĐIỀU PHỐI: mở transaction, gọi domain, ghi DB, phát outbox.
+                Biết Mongoose (cần ClientSession để bọc transaction).
 
-persistence/  → truy cập DB. Chỉ nơi này import Mongoose model.
+domain/       → logic THUẦN, không I/O: hash mật khẩu, ký token, parse
+                thiết bị. KHÔNG biết NATS, KHÔNG biết Mongoose.
+                ESLint chặn import mongoose/nats ở đây.
+
+persistence/  → Mongoose schema và truy vấn.
 
 clients/      → gọi service khác. Mỗi client bọc sẵn timeout + circuit breaker
                 + fallback. Domain gọi interface, không gọi NATS trực tiếp.
 ```
 
-`domain/` không được import gì từ `api/`, `events/`, hay `clients/` cụ thể — chỉ import **interface** của client. Nhờ đó test domain không cần NATS, không cần Mongo.
+### Vì sao tách `application/` khỏi `domain/`
+
+Ban đầu tài liệu này gộp hai tầng làm một, với lý do "mock repository để test
+không cần DB". Khi viết `identity-service` thật thì lý do đó không đứng vững:
+
+**Transaction bắt buộc phải bao cả logic lẫn ghi DB.** Outbox pattern yêu cầu
+dữ liệu nghiệp vụ và event cùng nằm trong một `ClientSession`. Logic nào quyết
+định ghi gì thì cũng phải cầm session đó — tức là nó biết Mongoose, không thể
+thuần được.
+
+Và mock repository sẽ làm test MẤT giá trị: thứ cần kiểm chứng chính là
+transaction có rollback đúng không. Mock đi thì chẳng còn gì để kiểm.
+
+Nên tách thành hai: `domain/` giữ phần THẬT SỰ thuần (argon2, JWT, parse
+User-Agent) — test được không cần hạ tầng; `application/` điều phối và được
+phép biết Mongoose. ESLint vẫn chặn mongoose/nats trong `domain/`, nên ranh
+giới này không trôi theo thời gian.
 
 ### Quy tắc phụ thuộc (enforce bằng ESLint)
 

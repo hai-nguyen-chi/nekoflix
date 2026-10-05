@@ -1,7 +1,9 @@
 import type { z } from 'zod';
 import { pingEchoCreatedV1 } from './ping';
+import { securityAlertV1, userLoggedInV1, userRegisteredV1, userVerifiedV1 } from './identity';
 
 export * from './ping';
+export * from './identity';
 
 /**
  * Nguồn sự thật duy nhất cho mọi event trong hệ thống.
@@ -13,6 +15,11 @@ export * from './ping';
  */
 export const EVENT_REGISTRY = {
   'ping.echo.created': { version: 1, schema: pingEchoCreatedV1 },
+
+  'identity.user.registered': { version: 1, schema: userRegisteredV1 },
+  'identity.user.verified': { version: 1, schema: userVerifiedV1 },
+  'identity.user.logged_in': { version: 1, schema: userLoggedInV1 },
+  'identity.security.alert': { version: 1, schema: securityAlertV1 },
 } as const;
 
 export type EventRegistry = typeof EVENT_REGISTRY;

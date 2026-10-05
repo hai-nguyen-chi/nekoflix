@@ -13,6 +13,15 @@ export interface BreakerOptions {
   rollingWindowMs?: number;
   /** Thời gian mở mạch trước khi thử lại (ms) */
   resetTimeoutMs?: number;
+  /**
+   * Lỗi này có tính là "service hỏng" không? Mặc định: mọi lỗi đều tính.
+   *
+   * PHẢI khai báo khi lời gọi có thể trả về lỗi NGHIỆP VỤ. Sai mật khẩu
+   * nghĩa là service chạy hoàn hảo — nó vừa trả lời "không". Tính nó là
+   * hỏng thì 5 lần gõ sai mật khẩu sẽ mở mạch và làm đăng nhập của MỌI
+   * NGƯỜI chết trong 10 giây.
+   */
+  isFailure?: (err: unknown) => boolean;
 }
 
 /**
@@ -68,7 +77,12 @@ export class CircuitBreaker {
       this.onSuccess();
       return result;
     } catch (err) {
-      this.onFailure();
+      if (this.opts.isFailure?.(err) ?? true) {
+        this.onFailure();
+      } else {
+        // Lỗi nghiệp vụ: service vẫn khoẻ, tính như một lần gọi THÀNH CÔNG
+        this.onSuccess();
+      }
       throw err;
     } finally {
       if (this.state === 'half-open') this.halfOpenInFlight = false;

@@ -7,8 +7,25 @@ import {
   pingRequest,
   pingResponse,
 } from './ping';
+import {
+  getUserRequest,
+  getUserResponse,
+  listSessionsRequest,
+  listSessionsResponse,
+  loginRequest,
+  loginResponse,
+  logoutRequest,
+  logoutResponse,
+  refreshRequest,
+  refreshResponse,
+  registerRequest,
+  registerResponse,
+  verifyEmailRequest,
+  verifyEmailResponse,
+} from './identity';
 
 export * from './ping';
+export * from './identity';
 
 const empty = { parse: (v: unknown) => v } as unknown as z.ZodType<Record<string, never>>;
 
@@ -24,6 +41,14 @@ export const RPC_REGISTRY = {
   'ping.echo.create': { request: createEchoRequest, response: createEchoResponse },
   'ping.echo.list': { request: empty, response: listEchoesResponse },
   'pong.received.list': { request: empty, response: listReceivedResponse },
+
+  'identity.auth.register': { request: registerRequest, response: registerResponse },
+  'identity.auth.login': { request: loginRequest, response: loginResponse },
+  'identity.auth.refresh': { request: refreshRequest, response: refreshResponse },
+  'identity.auth.logout': { request: logoutRequest, response: logoutResponse },
+  'identity.auth.verifyEmail': { request: verifyEmailRequest, response: verifyEmailResponse },
+  'identity.user.get': { request: getUserRequest, response: getUserResponse },
+  'identity.session.list': { request: listSessionsRequest, response: listSessionsResponse },
 } as const;
 
 export type RpcRegistry = typeof RPC_REGISTRY;

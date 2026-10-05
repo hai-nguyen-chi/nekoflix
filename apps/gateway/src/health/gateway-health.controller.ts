@@ -1,6 +1,7 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { NatsConnectionProvider, registry } from '@nekoflix/service-kit';
+import { Public } from '../auth/jwt.guard';
 
 /**
  * Gateway không có database nên không dùng HealthController của service-kit.
@@ -9,6 +10,9 @@ import { NatsConnectionProvider, registry } from '@nekoflix/service-kit';
  * ping-service chết, orchestrator sẽ restart gateway — trong khi gateway
  * hoàn toàn khỏe và vẫn phục vụ được các route khác.
  */
+// Health check và metrics PHẢI công khai: Docker healthcheck và Prometheus
+// không có access token, và chặn chúng sẽ làm container không bao giờ healthy.
+@Public()
 @Controller()
 export class GatewayHealthController {
   constructor(private readonly nats: NatsConnectionProvider) {}

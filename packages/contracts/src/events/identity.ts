@@ -1,0 +1,63 @@
+import { z } from 'zod';
+
+/**
+ * Event do identity-service phát ra.
+ *
+ * Nguyên tắc: payload phải TỰ CHỨA ĐỦ dữ liệu để consumer làm việc của mình.
+ * Chỉ gửi id thì notification-service buộc phải gọi ngược về identity để lấy
+ * email — và nếu identity đang chết thì email không gửi được, dù event đã
+ * nhận thành công.
+ */
+
+export const userRegisteredV1 = z.object({
+  userId: z.string(),
+  email: z.string(),
+  displayName: z.string(),
+  /** Token xác thực email dạng THÔ — notification-service cần để dựng link */
+  verificationToken: z.string(),
+  verificationExpiresAt: z.string().datetime(),
+  registeredAt: z.string().datetime(),
+});
+export type UserRegisteredV1 = z.infer<typeof userRegisteredV1>;
+
+export const userVerifiedV1 = z.object({
+  userId: z.string(),
+  email: z.string(),
+  verifiedAt: z.string().datetime(),
+});
+export type UserVerifiedV1 = z.infer<typeof userVerifiedV1>;
+
+export const userLoggedInV1 = z.object({
+  userId: z.string(),
+  email: z.string(),
+  deviceLabel: z.string(),
+  ip: z.string(),
+  /** true khi thiết bị này chưa từng đăng nhập -> gửi mail cảnh báo */
+  isNewDevice: z.boolean(),
+  loggedInAt: z.string().datetime(),
+});
+export type UserLoggedInV1 = z.infer<typeof userLoggedInV1>;
+
+export const securityAlertType = z.enum([
+  'token_reuse_detected',
+  'password_changed',
+  'all_sessions_revoked',
+]);
+export type SecurityAlertType = z.infer<typeof securityAlertType>;
+
+/**
+ * Sự kiện bảo mật — notification-service gửi email cảnh báo.
+ *
+ * `token_reuse_detected` là nghiêm trọng nhất: nó nghĩa là một refresh token
+ * đã dùng rồi lại được dùng tiếp, tức nhiều khả năng token đã bị đánh cắp.
+ */
+export const securityAlertV1 = z.object({
+  userId: z.string(),
+  email: z.string(),
+  type: securityAlertType,
+  ip: z.string(),
+  userAgent: z.string(),
+  detail: z.string(),
+  occurredAt: z.string().datetime(),
+});
+export type SecurityAlertV1 = z.infer<typeof securityAlertV1>;

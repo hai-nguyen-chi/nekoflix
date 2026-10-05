@@ -1,3 +1,4 @@
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { createService } from '@nekoflix/service-kit';
 
@@ -10,6 +11,7 @@ void createService({
   enableRpcServer: false,
   configure: (app) => {
     app.use(helmet());
+    app.use(cookieParser());
     app.enableCors({
       origin: (process.env.WEB_ORIGIN ?? 'http://localhost:5173').split(','),
       credentials: true,

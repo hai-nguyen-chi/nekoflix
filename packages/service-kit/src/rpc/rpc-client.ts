@@ -16,6 +16,23 @@ import { wrapRpcPayload, type RpcMeta } from './rpc-payload';
 
 export const NATS_CLIENT = Symbol('NATS_CLIENT');
 
+/**
+ * Chỉ lỗi HẠ TẦNG mới làm circuit breaker mở mạch.
+ *
+ * Lỗi nghiệp vụ (sai mật khẩu, không tìm thấy, email trùng...) nghĩa là
+ * service đang chạy TỐT — nó vừa trả lời một câu trả lời hợp lệ là "không".
+ * Đếm chúng là hỏng sẽ biến hành vi bình thường của người dùng thành một
+ * cuộc tấn công từ chối dịch vụ lên chính mình.
+ */
+function isInfrastructureFailure(err: unknown): boolean {
+  if (!(err instanceof AppError)) return true;
+  return (
+    err.code === 'UPSTREAM_TIMEOUT' ||
+    err.code === 'SERVICE_UNAVAILABLE' ||
+    err.code === 'INTERNAL_ERROR'
+  );
+}
+
 export interface RpcCallOptions {
   /** Mặc định 2000ms — timeout phải GIẢM DẦN khi đi sâu vào trong */
   timeoutMs?: number;
@@ -113,7 +130,7 @@ export class RpcClient implements OnApplicationShutdown {
   private breakerFor(subject: string): CircuitBreaker {
     let breaker = this.breakers.get(subject);
     if (!breaker) {
-      breaker = new CircuitBreaker({ name: subject });
+      breaker = new CircuitBreaker({ name: subject, isFailure: isInfrastructureFailure });
       this.breakers.set(subject, breaker);
     }
     return breaker;
