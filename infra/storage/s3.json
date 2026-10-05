@@ -1,0 +1,18 @@
+{
+  "identities": [
+    {
+      "name": "nekoflix",
+      "credentials": [
+        {
+          "accessKey": "nekoflix",
+          "secretKey": "nekoflix123"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    },
+    {
+      "name": "anonymous",
+      "actions": ["Read:nekoflix-public"]
+    }
+  ]
+}

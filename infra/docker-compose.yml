@@ -1,0 +1,176 @@
+name: nekoflix
+
+services:
+  # ─────────────────────────────────────────────────────────────
+  # MongoDB — replica set 1 node.
+  # BẮT BUỘC replica set: transaction + change stream + outbox pattern.
+  # ─────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: nekoflix-mongo
+    command: ['--replSet', 'rs0', '--bind_ip_all']
+    ports: ['27017:27017']
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # Tự initiate replica set ở lần chạy đầu, rồi báo healthy khi PRIMARY.
+      test: |
+        mongosh --quiet --eval "
+          try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }
+        " && mongosh --quiet --eval "db.hello().isWritablePrimary" | grep -q true
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
+
+  # Tạo 8 DB user, mỗi user chỉ truy cập được database của service mình.
+  # Đây là cơ chế ÉP ranh giới service ở tầng hạ tầng (ADR-012).
+  mongo-init:
+    image: mongo:7
+    container_name: nekoflix-mongo-init
+    depends_on:
+      mongo: { condition: service_healthy }
+    volumes:
+      - ./mongo/init-users.js:/scripts/init-users.js:ro
+    environment:
+      SERVICE_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-devpassword}
+    command: >
+      mongosh --host mongo:27017 --quiet
+      --eval "globalThis.SERVICE_DB_PASSWORD = process.env.SERVICE_DB_PASSWORD; void 0"
+      /scripts/init-users.js
+    restart: 'no'
+
+  # ─────────────────────────────────────────────────────────────
+  # Redis — cache, BullMQ, presence, rate limit, stream counter
+  # ─────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: nekoflix-redis
+    command:
+      [
+        'redis-server',
+        '--appendonly',
+        'yes',
+        '--maxmemory',
+        '512mb',
+        '--maxmemory-policy',
+        'allkeys-lru',
+      ]
+    ports: ['6379:6379']
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────────────────────────────────────────
+  # NATS JetStream — event bus + request/reply giữa các service
+  # ─────────────────────────────────────────────────────────────
+  nats:
+    image: nats:2.10-alpine
+    container_name: nekoflix-nats
+    command: ['-c', '/etc/nats/nats.conf']
+    ports:
+      - '4222:4222' # client
+      - '8222:8222' # monitoring UI
+    volumes:
+      - nats-data:/data
+      - ./nats/nats.conf:/etc/nats/nats.conf:ro
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8222/healthz']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────────────────────────────────────────
+  # SeaweedFS — object storage tương thích S3, cho video + ảnh.
+  #
+  # Thay cho MinIO: từ 2025 image MinIO không còn pull tự do được nữa
+  # (pull access denied trên cả Docker Hub lẫn quay.io). Xem ADR-013.
+  # ─────────────────────────────────────────────────────────────
+  storage:
+    image: chrislusf/seaweedfs:latest
+    container_name: nekoflix-storage
+    command: >
+      server -dir=/data -ip=storage
+      -s3 -s3.port=8333 -s3.config=/config/s3.json
+      -master.volumeSizeLimitMB=2048 -volume.max=0
+    ports:
+      - '9000:8333' # S3 API  (giữ cổng 9000 như cũ)
+      - '9001:8888' # Filer UI — xem file đã lưu
+      - '9333:9333' # Master UI
+    volumes:
+      - storage-data:/data
+      - ./storage/s3.json:/config/s3.json:ro
+    healthcheck:
+      test: ['CMD', 'nc', '-z', 'storage', '8333']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # Tạo bucket qua S3 API chuẩn, không dùng CLI riêng của nhà cung cấp.
+  # Nhờ vậy script này chạy được với SeaweedFS, Garage, S3 thật, hay R2.
+  storage-init:
+    image: amazon/aws-cli:latest
+    container_name: nekoflix-storage-init
+    depends_on:
+      storage: { condition: service_healthy }
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY:-nekoflix}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY:-nekoflix123}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: 'true'
+    entrypoint: /bin/sh
+    command: /scripts/init-buckets.sh
+    volumes: ['./storage:/scripts:ro']
+    restart: 'no'
+
+  # ─────────────────────────────────────────────────────────────
+  # Jaeger — distributed tracing.
+  # KHÔNG phải tùy chọn: với 9 service, thiếu trace là mù hoàn toàn.
+  # ─────────────────────────────────────────────────────────────
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: nekoflix-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+    ports:
+      - '16686:16686' # UI
+      - '4318:4318' # OTLP HTTP
+      - '4317:4317' # OTLP gRPC
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:16686/']
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────────────────────────────────────────
+  # Công cụ dev
+  # ─────────────────────────────────────────────────────────────
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: nekoflix-mailpit
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # UI
+    environment:
+      MP_MAX_MESSAGES: 500
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: nekoflix-mongo-express
+    depends_on:
+      mongo: { condition: service_healthy }
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      ME_CONFIG_BASICAUTH: 'false'
+    ports: ['8081:8081']
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+  redis-data:
+  storage-data:
+  nats-data:

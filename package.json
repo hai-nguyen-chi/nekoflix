@@ -1,0 +1,43 @@
+{
+  "name": "nekoflix",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:ping": "turbo run dev --filter=gateway --filter=ping-service --filter=pong-service",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md,yml}\"",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d --wait mongo redis nats storage jaeger mailpit mongo-express && docker compose -f infra/docker-compose.yml up mongo-init storage-init",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:reset": "docker compose -f infra/docker-compose.yml down -v",
+    "infra:logs": "docker compose -f infra/docker-compose.yml logs -f",
+    "gen:secrets": "tsx scripts/gen-secrets.ts",
+    "smoke": "tsx scripts/smoke-test.ts",
+    "new:service": "tsx scripts/new-service.ts",
+    "verify:idempotency": "tsx scripts/verify-idempotency.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "@vitest/coverage-v8": "^2.1.8",
+    "mongodb-memory-server": "^10.1.3",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100,
+    "semi": true
+  }
+}

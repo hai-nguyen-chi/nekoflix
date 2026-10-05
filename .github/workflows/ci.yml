@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint · Typecheck · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm format:check
+
+  integration:
+    name: Smoke test (hạ tầng thật)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      # Hạ tầng thật, không mock: outbox cần transaction nên bắt buộc có
+      # replica set; idempotency cần unique index thật.
+      - name: Khởi động hạ tầng
+        run: |
+          cp .env.example .env
+          docker compose -f infra/docker-compose.yml up -d --wait mongo redis nats jaeger
+          docker compose -f infra/docker-compose.yml up mongo-init
+
+      - name: Chạy service nền
+        run: |
+          node apps/ping-service/dist/main.js  > /tmp/ping.log  2>&1 &
+          node apps/pong-service/dist/main.js  > /tmp/pong.log  2>&1 &
+          node apps/gateway/dist/main.js       > /tmp/gw.log    2>&1 &
+          npx wait-on -t 60000 http://localhost:4000/health/ready \
+                               http://localhost:4101/health/ready \
+                               http://localhost:4102/health/ready
+        env:
+          MONGO_HOST: localhost:27017
+          NATS_URL: nats://localhost:4222
+          SERVICE_DB_PASSWORD: devpassword
+          OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://localhost:4318/v1/traces
+
+      - run: pnpm smoke
+
+      - name: Log khi thất bại
+        if: failure()
+        run: |
+          echo "─── gateway ───";      cat /tmp/gw.log   || true
+          echo "─── ping-service ───"; cat /tmp/ping.log || true
+          echo "─── pong-service ───"; cat /tmp/pong.log || true
+          docker compose -f infra/docker-compose.yml logs --tail=80
