@@ -174,6 +174,15 @@ async function main(): Promise<void> {
     assert(data.degraded === false, 'pong-service nên đang chạy');
   });
 
+  // ── 6. Ranh giới database ───────────────────────────────────
+  // DB BOUNDARY — kiểm chứng ADR-012 ở tầng hạ tầng, không phải trên giấy.
+  // Chạy bằng tay vì cần docker exec:
+  //
+  //   docker exec nekoflix-mongo mongosh --quiet   //     -u ping_svc -p devpassword --authenticationDatabase admin   //     --eval 'db.getSiblingDB("nekoflix_pong").received.countDocuments()'
+  //
+  // PHẢI trả về "Unauthorized". Nếu đọc được, MongoDB đang chạy thiếu
+  // --auth và mọi DB user chỉ là trang trí.
+
   // ── Kết quả ─────────────────────────────────────────────────
   console.log(`\n${'─'.repeat(52)}`);
   console.log(`  ${passed} đạt, ${failed} thất bại`);

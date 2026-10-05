@@ -8,22 +8,51 @@ services:
   mongo:
     image: mongo:7
     container_name: nekoflix-mongo
-    command: ['--replSet', 'rs0', '--bind_ip_all']
+    # `--auth` là BẮT BUỘC, không phải tùy chọn.
+    #
+    # Thiếu nó, 10 DB user tạo ở mongo-init chỉ là trang trí: MongoDB cho
+    # mọi kết nối đọc/ghi mọi database. Toàn bộ cơ chế ép ranh giới service
+    # của ADR-012 sụp đổ mà không có dấu hiệu gì.
+    #
+    # Bật auth cùng replica set thì MongoDB đòi keyFile (xác thực giữa các
+    # member). Entrypoint dưới đây tự sinh keyFile trong container — không
+    # bind-mount từ Windows, vì Windows mount file với quyền 777 và MongoDB
+    # từ chối: "permissions on keyfile are too open".
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        set -e
+        KF=/data/configdb/keyfile
+        if [ ! -s "$$KF" ]; then
+          openssl rand -base64 756 > "$$KF"
+        fi
+        chmod 400 "$$KF"
+        chown 999:999 "$$KF"
+        exec docker-entrypoint.sh mongod \
+          --replSet rs0 --bind_ip_all --auth --keyFile "$$KF"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-rootpassword}
     ports: ['27017:27017']
     volumes:
       - mongo-data:/data/db
+      - mongo-config:/data/configdb
     healthcheck:
       # Tự initiate replica set ở lần chạy đầu, rồi báo healthy khi PRIMARY.
       test: |
-        mongosh --quiet --eval "
-          try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }
-        " && mongosh --quiet --eval "db.hello().isWritablePrimary" | grep -q true
+        mongosh -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" \
+          --authenticationDatabase admin --quiet --eval "
+            try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }
+          " && \
+        mongosh -u "$$MONGO_INITDB_ROOT_USERNAME" -p "$$MONGO_INITDB_ROOT_PASSWORD" \
+          --authenticationDatabase admin --quiet --eval "db.hello().isWritablePrimary" | grep -q true
       interval: 5s
       timeout: 10s
-      retries: 20
-      start_period: 10s
+      retries: 30
+      start_period: 15s
 
-  # Tạo 8 DB user, mỗi user chỉ truy cập được database của service mình.
+  # Tạo 10 DB user, mỗi user chỉ truy cập được database của service mình.
   # Đây là cơ chế ÉP ranh giới service ở tầng hạ tầng (ADR-012).
   mongo-init:
     image: mongo:7
@@ -34,10 +63,13 @@ services:
       - ./mongo/init-users.js:/scripts/init-users.js:ro
     environment:
       SERVICE_DB_PASSWORD: ${SERVICE_DB_PASSWORD:-devpassword}
+      MONGO_ROOT_USER: ${MONGO_ROOT_USER:-root}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-rootpassword}
     command: >
-      mongosh --host mongo:27017 --quiet
+      bash -c 'mongosh --host mongo:27017 --quiet
+      -u "$$MONGO_ROOT_USER" -p "$$MONGO_ROOT_PASSWORD" --authenticationDatabase admin
       --eval "globalThis.SERVICE_DB_PASSWORD = process.env.SERVICE_DB_PASSWORD; void 0"
-      /scripts/init-users.js
+      /scripts/init-users.js'
     restart: 'no'
 
   # ─────────────────────────────────────────────────────────────
@@ -164,13 +196,14 @@ services:
     depends_on:
       mongo: { condition: service_healthy }
     environment:
-      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/?replicaSet=rs0&directConnection=true
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-root}:${MONGO_ROOT_PASSWORD:-rootpassword}@mongo:27017/?replicaSet=rs0&directConnection=true&authSource=admin
       ME_CONFIG_BASICAUTH: 'false'
     ports: ['8081:8081']
     restart: unless-stopped
 
 volumes:
   mongo-data:
+  mongo-config:
   redis-data:
   storage-data:
   nats-data:
