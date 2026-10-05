@@ -1,0 +1,32 @@
+# Chuẩn hoá line ending.
+#
+# Không có file này, Git trên Windows cảnh báo "LF will be replaced by CRLF"
+# ở mỗi lần commit, và file có thể bị lẫn lộn CRLF/LF giữa máy Windows với
+# CI chạy Linux — gây diff giả và làm hỏng script shell.
+
+* text=auto eol=lf
+
+# Script shell chạy trong container Linux: LF là BẮT BUỘC.
+# Dính CRLF thì Linux báo "bad interpreter: /bin/sh^M".
+*.sh    text eol=lf
+*.conf  text eol=lf
+
+# File nhị phân: Git không được đụng vào
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.avif  binary
+*.mp4   binary
+*.m4s   binary
+*.ts    -text -diff linguist-language=TypeScript
+*.woff  binary
+*.woff2 binary
+
+# .ts ở trên bị nhầm với MPEG-TS; ép lại thành text cho TypeScript
+*.ts    text eol=lf
+
+# Lockfile: hiện diff gọn hơn khi review
+pnpm-lock.yaml -diff linguist-generated=true
