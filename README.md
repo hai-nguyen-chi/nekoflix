@@ -26,7 +26,7 @@ React 19 + Vite
               │  NATS JetStream   │  event bus (at-least-once)
               └───────────────────┘
                         │
-   MongoDB (8 DB độc lập) · Redis · MinIO · Jaeger
+   MongoDB (DB riêng mỗi service) · Redis · SeaweedFS · Jaeger
 ```
 
 Mỗi service sở hữu database riêng, không ai đọc DB của ai. Ghi DB + phát event qua **Transactional Outbox**.
@@ -50,7 +50,7 @@ Mỗi service sở hữu database riêng, không ai đọc DB của ai. Ghi DB +
 | 12     | [Testing Strategy](docs/12-testing-strategy.md)                           | Unit / contract / integration / e2e             |
 | **13** | [**Service Catalog**](docs/13-service-catalog.md)                         | Từng service: trách nhiệm, dữ liệu, API, event  |
 | **14** | [**Inter-service Communication**](docs/14-inter-service-communication.md) | Outbox, idempotency, saga, DLQ, contract test   |
-| —      | [ADR](docs/adr/)                                                          | 12 Architecture Decision Records                |
+| —      | [ADR](docs/adr/)                                                          | 14 Architecture Decision Records                |
 
 > Mới bắt đầu? Đọc theo thứ tự: [00](docs/00-overview.md) → [02](docs/02-architecture.md) → [13](docs/13-service-catalog.md) → [14](docs/14-inter-service-communication.md).
 
@@ -60,7 +60,7 @@ Mỗi service sở hữu database riêng, không ai đọc DB của ai. Ghi DB +
 **Backend**: NestJS 11 × 9 service, Mongoose, Passport, BullMQ, socket.io, Zod
 **Giao tiếp**: NATS JetStream (event + request/reply), Transactional Outbox, Saga
 **Data**: MongoDB 7 (replica set, 8 database độc lập), Redis 7
-**Media**: FFmpeg, MinIO (S3-compatible), HLS (fMP4, AES-128)
+**Media**: FFmpeg, SeaweedFS (S3-compatible), HLS (fMP4, AES-128)
 **Observability**: OpenTelemetry + Jaeger, pino, Prometheus
 **Infra**: Docker Compose, GitHub Actions, pnpm workspaces + Turborepo
 **Deploy (0đ)**: Cloudflare Pages + Cloudflare Tunnel · tùy chọn Oracle Cloud Always Free
@@ -75,14 +75,14 @@ Xem [docs/10-devops-setup.md](docs/10-devops-setup.md).
 
 ```bash
 pnpm install
-pnpm infra:up               # mongo, redis, nats, minio, jaeger
-pnpm db:migrate && pnpm db:seed
+cp .env.example .env
+pnpm infra:up               # mongo, redis, nats, storage, jaeger, mailpit
+pnpm build && pnpm db:seed
 
-pnpm dev                    # tất cả service
-pnpm dev:auth               # hoặc chỉ gateway + identity + web
+pnpm dev:ping               # gateway + ping-service + pong-service
 ```
 
-Không cần chạy cả 15 container mỗi lần — xem [compose profiles](docs/10-devops-setup.md#31-chạy-một-phần-hệ-thống).
+Cửa sổ thứ hai: `pnpm smoke` để kiểm chứng toàn bộ đường dây.
 
 ## Trạng thái
 
@@ -90,7 +90,11 @@ Không cần chạy cả 15 container mỗi lần — xem [compose profiles](doc
 ⬜ Phase 1 (identity-service) — tiếp theo. Xem [Roadmap](docs/11-roadmap.md).
 
 ```
-pnpm typecheck   7/7 xanh
-pnpm test        22/22 xanh  (gồm transaction thật trên MongoDB replica set)
-pnpm smoke       kiểm chứng HTTP -> NATS -> outbox -> JetStream -> consumer
+pnpm build               5/5 xanh
+pnpm lint                5/5 xanh    (rào chắn kiến trúc, đã kiểm chứng chặn thật)
+pnpm typecheck           7/7 xanh
+pnpm test                22/22 xanh  (transaction thật trên MongoDB replica set)
+pnpm smoke               10/10 đạt   (hạ tầng Docker thật)
+pnpm verify:idempotency  ĐẠT
+Jaeger                   trace liền mạch qua 3 service
 ```
