@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JetStreamConsumer } from './events/jetstream.consumer';
 import { HealthController } from './health/health.controller';
+import { IndexGuard } from './infra/index-guard';
 import { IdempotencyService } from './idempotency/idempotency.service';
 import { ProcessedEvent, ProcessedEventSchema } from './idempotency/processed-event.schema';
 import { NatsConnectionProvider } from './nats/nats.connection';
@@ -69,6 +70,8 @@ export class ServiceKitModule {
     ];
 
     if (options.database) {
+      providers.push(IndexGuard);
+      exported.push(IndexGuard);
       imports.push(
         MongooseModule.forRoot(buildMongoUri(options.database), {
           autoIndex: process.env.NODE_ENV !== 'production',

@@ -8,6 +8,7 @@ export * from './errors/app-error';
 export * from './events/on-event.decorator';
 export * from './events/jetstream.consumer';
 
+export * from './infra/index-guard';
 export * from './idempotency/idempotency.service';
 export * from './idempotency/processed-event.schema';
 
