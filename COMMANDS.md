@@ -4,6 +4,7 @@ Mở file này khi quên lệnh hoặc khi có gì đó hỏng.
 
 - Lần đầu cài máy mới → [GETTING-STARTED.md](GETTING-STARTED.md)
 - Phase 0 có gì → [PHASE-0.md](PHASE-0.md)
+- Code chạy ra sao → [docs/15-code-walkthrough.md](docs/15-code-walkthrough.md)
 
 ---
 

@@ -50,9 +50,11 @@ Mỗi service sở hữu database riêng, không ai đọc DB của ai. Ghi DB +
 | 12     | [Testing Strategy](docs/12-testing-strategy.md)                           | Unit / contract / integration / e2e             |
 | **13** | [**Service Catalog**](docs/13-service-catalog.md)                         | Từng service: trách nhiệm, dữ liệu, API, event  |
 | **14** | [**Inter-service Communication**](docs/14-inter-service-communication.md) | Outbox, idempotency, saga, DLQ, contract test   |
+| **15** | [**Đọc hiểu code**](docs/15-code-walkthrough.md)                          | File nào làm gì, ai gọi ai, config từ đâu       |
 | —      | [ADR](docs/adr/)                                                          | 14 Architecture Decision Records                |
 
-> Mới bắt đầu? Đọc theo thứ tự: [00](docs/00-overview.md) → [02](docs/02-architecture.md) → [13](docs/13-service-catalog.md) → [14](docs/14-inter-service-communication.md).
+> **Mới bắt đầu?** Chạy được rồi thì đọc [15 — Đọc hiểu code](docs/15-code-walkthrough.md) trước.
+> Muốn hiểu thiết kế: [00](docs/00-overview.md) → [02](docs/02-architecture.md) → [13](docs/13-service-catalog.md) → [14](docs/14-inter-service-communication.md).
 
 ## Tech Stack
 

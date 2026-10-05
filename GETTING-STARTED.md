@@ -495,9 +495,10 @@ An toàn — hiện chưa có dữ liệu thật nào để mất.
 Theo thứ tự này:
 
 1. **[PHASE-0.md](PHASE-0.md)** — tóm tắt những gì đã xây
-2. **[docs/00-overview.md](docs/00-overview.md)** — mục tiêu và phạm vi dự án
-3. **[docs/02-architecture.md](docs/02-architecture.md)** — kiến trúc tổng thể
-4. **[docs/14-inter-service-communication.md](docs/14-inter-service-communication.md)** — outbox, idempotency, saga (phần khó nhất và cũng giá trị nhất)
+2. **[docs/15-code-walkthrough.md](docs/15-code-walkthrough.md)** — file nào làm gì, ai gọi ai
+3. **[docs/00-overview.md](docs/00-overview.md)** — mục tiêu và phạm vi dự án
+4. **[docs/02-architecture.md](docs/02-architecture.md)** — kiến trúc tổng thể
+5. **[docs/14-inter-service-communication.md](docs/14-inter-service-communication.md)** — outbox, idempotency, saga (phần khó nhất và cũng giá trị nhất)
 
 Muốn hiểu code thì đọc theo đường đi của một request:
 
