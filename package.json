@@ -22,7 +22,10 @@
     "gen:secrets": "tsx scripts/gen-secrets.ts",
     "smoke": "tsx scripts/smoke-test.ts",
     "new:service": "tsx scripts/new-service.ts",
-    "verify:idempotency": "tsx scripts/verify-idempotency.ts"
+    "verify:idempotency": "tsx scripts/verify-idempotency.ts",
+    "db:export": "tsx scripts/db-sync.ts export",
+    "db:import": "tsx scripts/db-sync.ts import",
+    "db:list": "tsx scripts/db-sync.ts list"
   },
   "devDependencies": {
     "@types/node": "^20.17.10",

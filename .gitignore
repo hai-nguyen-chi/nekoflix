@@ -29,3 +29,6 @@ apps/*/src/**/*.d.ts
 packages/*/src/**/*.js
 packages/*/src/**/*.d.ts
 !packages/config-eslint/index.js
+
+# Dump database — file nhị phân, phình nhanh, có thể chứa dữ liệu nhạy cảm
+.data/
