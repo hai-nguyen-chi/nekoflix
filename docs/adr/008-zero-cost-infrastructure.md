@@ -20,18 +20,18 @@ Ràng buộc đầy đủ:
 
 ## Những phương án đã cân nhắc và loại
 
-| Phương án                                  | Vì sao loại                                                                                                                                                   |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **VPS Hetzner CX22 (€4/tháng)**            | Vi phạm ràng buộc 1                                                                                                                                           |
-| **Cloudflare R2 / Backblaze B2** cho video | Free tier 10GB. Một phim 1080p sau transcode ~4GB → chứa được 2 phim. Vượt là tính tiền, và tính theo dung lượng lưu trữ nên **tốn tiền cả khi không ai xem** |
-| **AWS Free Tier**                          | 12 tháng rồi hết. S3 tính **phí egress** — streaming chính là egress. Rủi ro hóa đơn bất ngờ cao nhất trong các lựa chọn                                      |
-| **Fly.io / Railway / Render (paid tier)**  | Trial credit rồi chuyển sang trả phí                                                                                                                          |
-| **Render free web service**                | Ngủ sau 15 phút không dùng, 512MB RAM. Không đủ cho transcode, và cold start làm demo trông như hỏng                                                          |
-| **Vercel free**                            | Băng thông 100GB/tháng và **cấm dùng cho mục đích thương mại** — không vấn đề với dự án học, nhưng Cloudflare Pages không giới hạn băng thông nên tốt hơn hẳn |
-| **ngrok free**                             | URL đổi mỗi lần khởi động, giới hạn kết nối đồng thời                                                                                                         |
-| **MongoDB Atlas M0**                       | Miễn phí thật, nhưng 512MB và không cho bật replica set theo ý mình. Tự host bằng Docker vừa miễn phí vừa không giới hạn                                      |
-| **Stripe test mode**                       | Không mất phí, nhưng cần tài khoản + Stripe hỗ trợ pháp nhân Việt Nam hạn chế. Xem [ADR-009](009-mock-payment-provider.md)                                    |
-| **Sentry free**                            | 5.000 lỗi/tháng, miễn phí thật. Nhưng GlitchTip self-hosted tương thích SDK hoàn toàn → không có lý do phụ thuộc bên ngoài                                    |
+| Phương án                                  | Vì sao loại                                                                                                                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **VPS Hetzner CX22 (€4/tháng)**            | Vi phạm ràng buộc 1                                                                                                                                                                                    |
+| **Cloudflare R2 / Backblaze B2** cho video | Free tier 10GB. Một phim 1080p sau transcode ~4GB → chứa được 2 phim. Vượt là tính tiền, và tính theo dung lượng lưu trữ nên **tốn tiền cả khi không ai xem**                                          |
+| **AWS Free Tier**                          | 12 tháng rồi hết. S3 tính **phí egress** — streaming chính là egress. Rủi ro hóa đơn bất ngờ cao nhất trong các lựa chọn                                                                               |
+| **Fly.io / Railway / Render (paid tier)**  | Trial credit rồi chuyển sang trả phí                                                                                                                                                                   |
+| **Render free web service**                | Ngủ sau 15 phút không dùng, 512MB RAM. Không đủ cho transcode, và cold start làm demo trông như hỏng                                                                                                   |
+| **Vercel free**                            | Băng thông 100GB/tháng và **cấm dùng cho mục đích thương mại** — không vấn đề với dự án học, nhưng Cloudflare Pages không giới hạn băng thông nên tốt hơn hẳn                                          |
+| **ngrok free**                             | URL đổi mỗi lần khởi động, giới hạn kết nối đồng thời                                                                                                                                                  |
+| **MongoDB Atlas M0**                       | Miễn phí vĩnh viễn. **Không loại vì kỹ thuật** — xem đính chính ở [ADR-014](014-atlas-for-deploy-not-dev.md). Loại khỏi môi trường **dev** vì độ trễ, test xoá dữ liệu, và không làm việc offline được |
+| **Stripe test mode**                       | Không mất phí, nhưng cần tài khoản + Stripe hỗ trợ pháp nhân Việt Nam hạn chế. Xem [ADR-009](009-mock-payment-provider.md)                                                                             |
+| **Sentry free**                            | 5.000 lỗi/tháng, miễn phí thật. Nhưng GlitchTip self-hosted tương thích SDK hoàn toàn → không có lý do phụ thuộc bên ngoài                                                                             |
 
 ## Quyết định
 
