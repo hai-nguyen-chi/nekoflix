@@ -84,6 +84,27 @@ export default tseslint.config(
     },
   },
 
+  // Frontend: chạy trong trình duyệt, không có global của Node
+  {
+    files: ['**/*.tsx'],
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        fetch: 'readonly',
+        localStorage: 'readonly',
+        console: 'readonly',
+      },
+    },
+    rules: {
+      // JSX dùng component mà ESLint không thấy là "đã dùng"
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^(_|React$)' },
+      ],
+    },
+  },
+
   {
     files: ['**/*.spec.ts', '**/*.test.ts', '**/test/**/*.ts', 'scripts/**/*.ts'],
     rules: {

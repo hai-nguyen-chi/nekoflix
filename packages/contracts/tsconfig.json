@@ -2,7 +2,7 @@
   "extends": "@nekoflix/config-ts/nest.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist/cjs"
   },
   "include": ["src/**/*"]
 }
