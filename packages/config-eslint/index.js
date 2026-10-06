@@ -50,8 +50,15 @@ export default tseslint.config(
                 'Service không được import service khác. Dùng RpcClient (sync) hoặc @OnEvent (async).',
             },
             {
-              group: ['../../*'],
-              message: 'Đi ngược quá nhiều cấp — dùng package workspace thay vì đường dẫn tương đối.',
+              // Chặn vượt ra khỏi package của mình.
+              //
+              // Trước đây quy tắc là `../../*` — quá rộng: nó chặn cả việc
+              // điều hướng BÌNH THƯỜNG trong cùng một service, ví dụ
+              // src/events/handlers/x.ts -> ../../persistence/schemas/y.
+              // Cái cần chặn là vượt ranh giới package, không phải độ sâu.
+              group: ['**/packages/*/src/**', '../../../*'],
+              message:
+                'Đi ra ngoài package của mình — import qua tên package workspace (@nekoflix/...).',
             },
           ],
         },

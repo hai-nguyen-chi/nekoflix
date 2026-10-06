@@ -1,0 +1,3 @@
+Biên event: @OnEvent.
+Idempotency đã được JetStreamConsumer bọc sẵn — handler nhận (event, session)
+và PHẢI ghi qua session đó, nếu không bản ghi nằm ngoài transaction.

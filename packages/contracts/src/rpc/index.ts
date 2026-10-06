@@ -59,12 +59,19 @@ import {
   resetPasswordRequest,
   resetPasswordResponse,
 } from './password';
+import {
+  listNotificationsRequest,
+  listNotificationsResponse,
+  markReadRequest,
+  markReadResponse,
+} from './notification';
 
 export * from './ping';
 export * from './identity';
 export * from './profile';
 export * from './oauth';
 export * from './password';
+export * from './notification';
 
 const empty = { parse: (v: unknown) => v } as unknown as z.ZodType<Record<string, never>>;
 
@@ -107,6 +114,9 @@ export const RPC_REGISTRY = {
   'identity.password.forgot': { request: forgotPasswordRequest, response: forgotPasswordResponse },
   'identity.password.reset': { request: resetPasswordRequest, response: resetPasswordResponse },
   'identity.password.change': { request: changePasswordRequest, response: changePasswordResponse },
+
+  'notification.list': { request: listNotificationsRequest, response: listNotificationsResponse },
+  'notification.markRead': { request: markReadRequest, response: markReadResponse },
 } as const;
 
 export type RpcRegistry = typeof RPC_REGISTRY;
