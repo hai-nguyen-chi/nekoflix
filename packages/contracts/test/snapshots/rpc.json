@@ -1,0 +1,1318 @@
+{
+  "identity.auth.register#request": {
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "displayName": {
+      "type": "string<max,min,trim>",
+      "optional": false,
+      "nullable": false
+    },
+    "email": {
+      "type": "string<email,max,toLowerCase>",
+      "optional": false,
+      "nullable": false
+    },
+    "password": {
+      "type": "string<max,min,regex,regex>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.auth.register#response": {
+    "tokens": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.accessToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.expiresIn": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshExpiresAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "user.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "user.displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.emailVerified": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "user.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.role": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["admin", "moderator", "user"]
+    }
+  },
+  "identity.auth.login#request": {
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "email": {
+      "type": "string<email,max,toLowerCase>",
+      "optional": false,
+      "nullable": false
+    },
+    "password": {
+      "type": "string<max,min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.auth.login#response": {
+    "tokens": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.accessToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.expiresIn": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshExpiresAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "user.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "user.displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.emailVerified": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "user.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.role": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["admin", "moderator", "user"]
+    }
+  },
+  "identity.auth.refresh#request": {
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "refreshToken": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.auth.refresh#response": {
+    "tokens": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.accessToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.expiresIn": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshExpiresAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.auth.logout#request": {
+    "allDevices": {
+      "type": "boolean",
+      "optional": true,
+      "nullable": false
+    },
+    "refreshToken": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    }
+  },
+  "identity.auth.logout#response": {
+    "revoked": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.auth.verifyEmail#request": {
+    "token": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.auth.verifyEmail#response": {
+    "user": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "user.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "user.displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.emailVerified": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "user.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.role": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["admin", "moderator", "user"]
+    }
+  },
+  "identity.user.get#request": {
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.user.get#response": {
+    "user": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "user.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "user.displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.emailVerified": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "user.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.role": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["admin", "moderator", "user"]
+    }
+  },
+  "identity.session.list#request": {
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.session.list#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].current": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].deviceLabel": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].ip": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].lastUsedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.list#request": {
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.list#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].avatarKey": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].hasPin": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].isKid": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].language": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["en", "vi"]
+    },
+    "items[].maturityLimit": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+    },
+    "items[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "remaining": {
+      "type": "number<int,min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.create#request": {
+    "avatarKey": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "avatar-01",
+        "avatar-02",
+        "avatar-03",
+        "avatar-04",
+        "avatar-05",
+        "avatar-06",
+        "avatar-07",
+        "avatar-08",
+        "avatar-09",
+        "avatar-10",
+        "avatar-11",
+        "avatar-12"
+      ]
+    },
+    "isKid": {
+      "type": "boolean",
+      "optional": true,
+      "nullable": false
+    },
+    "language": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": ["en", "vi"]
+    },
+    "name": {
+      "type": "string<max,min,trim>",
+      "optional": false,
+      "nullable": false
+    },
+    "pin": {
+      "type": "string<regex>",
+      "optional": true,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.create#response": {
+    "profile": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.avatarKey": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.hasPin": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.isKid": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.language": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["en", "vi"]
+    },
+    "profile.maturityLimit": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+    },
+    "profile.name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.update#request": {
+    "avatarKey": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "avatar-01",
+        "avatar-02",
+        "avatar-03",
+        "avatar-04",
+        "avatar-05",
+        "avatar-06",
+        "avatar-07",
+        "avatar-08",
+        "avatar-09",
+        "avatar-10",
+        "avatar-11",
+        "avatar-12"
+      ]
+    },
+    "language": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": ["en", "vi"]
+    },
+    "maturityLimit": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+    },
+    "name": {
+      "type": "string<max,min,trim>",
+      "optional": true,
+      "nullable": false
+    },
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.update#response": {
+    "profile": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.avatarKey": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.hasPin": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.isKid": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.language": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["en", "vi"]
+    },
+    "profile.maturityLimit": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+    },
+    "profile.name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.delete#request": {
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.delete#response": {
+    "deleted": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.select#request": {
+    "pin": {
+      "type": "string<regex>",
+      "optional": true,
+      "nullable": false
+    },
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "sessionId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.select#response": {
+    "accessToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "expiresIn": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "profile": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.avatarKey": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.hasPin": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.isKid": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.language": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["en", "vi"]
+    },
+    "profile.maturityLimit": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+    },
+    "profile.name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.setPin#request": {
+    "pin": {
+      "type": "string<regex>",
+      "optional": false,
+      "nullable": false
+    },
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.setPin#response": {
+    "ok": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.removePin#request": {
+    "password": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    },
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.removePin#response": {
+    "ok": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.verify#request": {
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.verify#response": {
+    "profile": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "profile.avatarKey": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.hasPin": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.isKid": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "profile.language": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["en", "vi"]
+    },
+    "profile.maturityLimit": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+    },
+    "profile.name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "valid": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.oauth.start#request": {
+    "provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["github", "google"]
+    },
+    "redirectPath": {
+      "type": "string<max,startsWith>",
+      "optional": true,
+      "nullable": false
+    }
+  },
+  "identity.oauth.start#response": {
+    "authorizeUrl": {
+      "type": "string<url>",
+      "optional": false,
+      "nullable": false
+    },
+    "state": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.oauth.callback#request": {
+    "code": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["github", "google"]
+    },
+    "state": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.oauth.callback#response": {
+    "exchangeCode": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "isNewUser": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "redirectPath": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.oauth.exchange#request": {
+    "code": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    }
+  },
+  "identity.oauth.exchange#response": {
+    "tokens": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.accessToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.expiresIn": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshExpiresAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "tokens.refreshToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "user.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "user.displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.emailVerified": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "user.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.role": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["admin", "moderator", "user"]
+    }
+  },
+  "identity.oauth.listLinked#request": {
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.oauth.listLinked#response": {
+    "canUnlink": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].linkedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["github", "google"]
+    }
+  },
+  "identity.oauth.unlink#request": {
+    "provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["github", "google"]
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.oauth.unlink#response": {
+    "unlinked": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.password.forgot#request": {
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "email": {
+      "type": "string<email,max,toLowerCase>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.password.forgot#response": {
+    "ok": {
+      "type": "literal<true>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.password.reset#request": {
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "newPassword": {
+      "type": "string<max,min,regex,regex>",
+      "optional": false,
+      "nullable": false
+    },
+    "token": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.password.reset#response": {
+    "user": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "user.createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "user.displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.emailVerified": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "user.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "user.role": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["admin", "moderator", "user"]
+    }
+  },
+  "identity.password.change#request": {
+    "ctx": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "ctx.ip": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "ctx.userAgent": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "currentPassword": {
+      "type": "string<max>",
+      "optional": true,
+      "nullable": false
+    },
+    "newPassword": {
+      "type": "string<max,min,regex,regex>",
+      "optional": false,
+      "nullable": false
+    },
+    "sessionId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.password.change#response": {
+    "revokedSessions": {
+      "type": "number<int,min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "notification.list#request": {
+    "limit": {
+      "type": "number<int,max,min>",
+      "optional": true,
+      "nullable": false
+    },
+    "unreadOnly": {
+      "type": "boolean",
+      "optional": true,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "notification.list#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].body": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].data": {
+      "type": "record",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].read": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].type": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "unreadCount": {
+      "type": "number<int,min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "notification.markRead#request": {
+    "notificationId": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "notification.markRead#response": {
+    "marked": {
+      "type": "number<int,min>",
+      "optional": false,
+      "nullable": false
+    }
+  }
+}

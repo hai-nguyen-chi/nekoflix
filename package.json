@@ -9,7 +9,6 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:ping": "turbo run dev --filter=gateway --filter=ping-service --filter=pong-service",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",

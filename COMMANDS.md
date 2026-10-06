@@ -14,7 +14,7 @@ Mở file này khi quên lệnh hoặc khi có gì đó hỏng.
 
 ```bash
 pnpm infra:up          # bật MongoDB, Redis, NATS, SeaweedFS, Jaeger, Mailpit
-pnpm dev:ping          # chạy service — ĐỂ NGUYÊN cửa sổ này
+pnpm dev:auth          # chạy service — ĐỂ NGUYÊN cửa sổ này
 ```
 
 Cửa sổ thứ hai để gõ lệnh khác (`curl`, `pnpm smoke`, git...).
@@ -45,7 +45,7 @@ git pull
 pnpm install           # nếu package.json đổi
 pnpm infra:up
 pnpm db:seed           # sinh lại dữ liệu mẫu — GIỐNG HỆT máy A
-pnpm build && pnpm dev:ping
+pnpm build && pnpm dev:auth
 ```
 
 **Đây là cách nên dùng.** Dữ liệu seed là _tất định_: cùng một lệnh cho cùng một kết quả trên mọi máy. Không cần copy file, không cần mạng, không bao giờ lệch phiên bản.
@@ -100,7 +100,7 @@ pnpm db:list           # xem các bản đã có
 | `pnpm install`                  | Cài thư viện                                   |
 | `pnpm build`                    | Dịch TypeScript → JavaScript                   |
 | `pnpm dev`                      | Chạy **tất cả** service                        |
-| `pnpm dev:ping`                 | Chỉ gateway + ping + pong                      |
+| `pnpm dev:auth`                 | gateway + identity + notification + web        |
 | `pnpm lint`                     | Kiểm tra quy tắc code + **rào chắn kiến trúc** |
 | `pnpm typecheck`                | Kiểm tra lỗi kiểu dữ liệu                      |
 | `pnpm format`                   | Tự sửa định dạng                               |
@@ -124,6 +124,19 @@ pnpm db:list           # xem các bản đã có
 | `pnpm smoke`              | Cần hạ tầng **và** service đang chạy |
 | `pnpm verify:idempotency` | Cần hạ tầng **và** service đang chạy |
 
+`pnpm test` bao gồm **contract test**: event mà identity-service phát ra có khớp
+schema trong `packages/contracts` không, và notification-service có xử lý được
+fixture chuẩn không. Hai bên không chạy cùng nhau — ràng buộc chung là schema.
+
+Khi cố ý sửa schema và đã xử lý cả hai phía, cập nhật snapshot tương thích ngược:
+
+```bash
+UPDATE_CONTRACT_SNAPSHOT=1 pnpm --filter @nekoflix/contracts test
+```
+
+Commit `packages/contracts/test/snapshots/*.json` cùng thay đổi schema — diff của
+snapshot chính là thứ cần nhìn khi review.
+
 ---
 
 ## 4. Các trang web
@@ -135,7 +148,8 @@ pnpm db:list           # xem các bản đã có
 | http://localhost:8081  | **Mongo Express** — xem dữ liệu trong database          |
 | http://localhost:8222  | NATS — xem stream và consumer                           |
 | http://localhost:9001  | SeaweedFS — nơi sẽ lưu video                            |
-| http://localhost:8025  | Mailpit — email gửi đi hiện ở đây                       |
+| http://localhost:8025  | **Mailpit** — mọi email hệ thống gửi đi hiện ở đây      |
+| http://localhost:5173  | Giao diện web (Vite dev server)                         |
 
 ---
 
@@ -147,18 +161,18 @@ docker compose -f infra/docker-compose.yml ps
 
 # Service có sống không?
 curl localhost:4000/health/ready    # gateway
-curl localhost:4101/health/ready    # ping-service
-curl localhost:4102/health/ready    # pong-service
+curl localhost:4001/health/ready    # identity-service
+curl localhost:4007/health/ready    # notification-service
 
 # Xem dữ liệu trong MongoDB
 docker exec nekoflix-mongo mongosh -u root -p rootpassword \
   --authenticationDatabase admin --quiet \
-  --eval 'db.getSiblingDB("nekoflix_ping").echoes.find().limit(5)'
+  --eval 'db.getSiblingDB("nekoflix_identity").users.find().limit(5)'
 
 # Kiểm tra ranh giới service CÓ được ép không (phải trả Unauthorized)
-docker exec nekoflix-mongo mongosh -u ping_svc -p devpassword \
+docker exec nekoflix-mongo mongosh -u identity_svc -p devpassword \
   --authenticationDatabase admin --quiet \
-  --eval 'db.getSiblingDB("nekoflix_pong").received.countDocuments()'
+  --eval 'db.getSiblingDB("nekoflix_notification").emailoutboxes.countDocuments()'
 ```
 
 ---
@@ -198,7 +212,7 @@ Bước 5 an toàn vì dữ liệu dev dựng lại được. Nếu có dữ li�
 | `Transaction numbers are only allowed on a replica set` | MongoDB không chạy replica set         | `pnpm infra:reset && pnpm infra:up`              |
 | `EADDRINUSE :4000`                                      | Lần chạy trước chưa tắt hẳn            | Xem mục "Cổng bị chiếm" bên dưới                 |
 | `E11000 duplicate key ... dup key: { id: null }`        | Index cũ còn sót sau khi đổi tên field | Xem mục "Index cũ" bên dưới                      |
-| `pnpm smoke` báo không chạy được                        | Service chưa chạy                      | Cửa sổ khác phải đang `pnpm dev:ping`            |
+| `pnpm smoke` báo không chạy được                        | Service chưa chạy                      | Cửa sổ khác phải đang `pnpm dev:auth`            |
 | `pnpm lint` báo `import is restricted`                  | Service import service khác            | Đúng ý đồ — dùng `RpcClient` hoặc `@OnEvent`     |
 | Jaeger trống trơn                                       | `.env` thiếu `OTEL_..._ENDPOINT`       | `cp .env.example .env` rồi khởi động lại service |
 
@@ -220,12 +234,12 @@ Xảy ra khi đổi tên field trong schema: Mongoose tạo index mới nhưng *
 # Xem index hiện có
 docker exec nekoflix-mongo mongosh -u root -p rootpassword \
   --authenticationDatabase admin --quiet \
-  --eval 'db.getSiblingDB("nekoflix_ping").outbox.getIndexes()'
+  --eval 'db.getSiblingDB("nekoflix_identity").outbox.getIndexes()'
 
 # Xoá index cũ
 docker exec nekoflix-mongo mongosh -u root -p rootpassword \
   --authenticationDatabase admin --quiet \
-  --eval 'db.getSiblingDB("nekoflix_ping").outbox.dropIndex("ten_index_cu")'
+  --eval 'db.getSiblingDB("nekoflix_identity").outbox.dropIndex("ten_index_cu")'
 ```
 
 Cách nhanh nhất khi dữ liệu không quan trọng: `pnpm infra:reset && pnpm infra:up && pnpm db:seed`.
@@ -245,7 +259,7 @@ wsl --shutdown                # khởi động lại WSL, rồi mở lại Docke
 
 ## 7. Những điều nên nhớ
 
-**Mỗi service một database riêng.** `ping-service` chỉ đọc được `nekoflix_ping`. Thử đọc database khác sẽ bị MongoDB từ chối — đó là chủ đích, không phải lỗi.
+**Mỗi service một database riêng.** `identity-service` chỉ đọc được `nekoflix_identity`. Thử đọc database khác sẽ bị MongoDB từ chối — đó là chủ đích, không phải lỗi.
 
 **Lỗi im lặng nguy hiểm hơn lỗi ồn ào.** Ba thứ cần để ý trong log:
 
@@ -257,6 +271,6 @@ wsl --shutdown                # khởi động lại WSL, rồi mở lại Docke
 
 1. `docker compose -f infra/docker-compose.yml ps` — container healthy chưa?
 2. `curl localhost:4000/health/ready` — service sống chưa?
-3. Cửa sổ chạy `pnpm dev:ping` có báo lỗi gì không?
+3. Cửa sổ chạy `pnpm dev:auth` có báo lỗi gì không?
 
 **`pnpm infra:reset` là an toàn.** Nó xoá dữ liệu dev, mà dữ liệu dev dựng lại được bằng `pnpm db:seed`. Khi bí, đừng ngại dùng.

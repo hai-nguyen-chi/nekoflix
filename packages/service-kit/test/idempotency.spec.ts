@@ -60,7 +60,9 @@ async function runOnce(
   try {
     await session.withTransaction(async () => {
       // INSERT TRƯỚC, XỬ LÝ SAU. Không được findOne rồi mới insert.
-      await Processed.create([{ eventId, consumer, eventType: 'ping.echo.created' }], { session });
+      await Processed.create([{ eventId, consumer, eventType: 'identity.user.registered' }], {
+        session,
+      });
       await fn(session);
     });
     return 'processed';
@@ -75,7 +77,7 @@ async function runOnce(
 describe('Idempotency ở consumer', () => {
   it('xử lý event lần đầu -> processed', async () => {
     const effect = vi.fn();
-    const result = await runOnce('evt-1', 'pong-service', async (session) => {
+    const result = await runOnce('evt-1', 'notification-service', async (session) => {
       await Received.create([{ echoId: 'e1', message: 'hello' }], { session });
       effect();
     });
@@ -92,8 +94,8 @@ describe('Idempotency ở consumer', () => {
         effect();
       });
 
-    expect(await runOnce('evt-1', 'pong-service', handler)).toBe('processed');
-    expect(await runOnce('evt-1', 'pong-service', handler)).toBe('duplicate');
+    expect(await runOnce('evt-1', 'notification-service', handler)).toBe('processed');
+    expect(await runOnce('evt-1', 'notification-service', handler)).toBe('duplicate');
 
     expect(effect).toHaveBeenCalledTimes(1);
     expect(await Received.countDocuments()).toBe(1);
@@ -110,8 +112,8 @@ describe('Idempotency ở consumer', () => {
     // `insert` — hai bản sao sẽ lọt cả hai qua khe hở giữa hai lệnh. Test
     // tuần tự luôn bỏ lọt lỗi này; nó chỉ lộ ra ở production.
     const results = await Promise.all([
-      runOnce('evt-1', 'pong-service', handler).catch(() => 'error' as const),
-      runOnce('evt-1', 'pong-service', handler).catch(() => 'error' as const),
+      runOnce('evt-1', 'notification-service', handler).catch(() => 'error' as const),
+      runOnce('evt-1', 'notification-service', handler).catch(() => 'error' as const),
     ]);
 
     expect(results.filter((r) => r === 'processed')).toHaveLength(1);
@@ -130,7 +132,7 @@ describe('Idempotency ở consumer', () => {
 
   it('handler lỗi -> rollback CẢ bản ghi processedEvents', async () => {
     await expect(
-      runOnce('evt-1', 'pong-service', () => Promise.reject(new Error('handler hỏng'))),
+      runOnce('evt-1', 'notification-service', () => Promise.reject(new Error('handler hỏng'))),
     ).rejects.toThrow('handler hỏng');
 
     // Nếu processedEvents còn lại, event sẽ bị coi là "đã xử lý" trong khi
@@ -138,7 +140,7 @@ describe('Idempotency ở consumer', () => {
     expect(await Processed.countDocuments({ eventId: 'evt-1' })).toBe(0);
 
     // Giao lại phải xử lý được
-    const result = await runOnce('evt-1', 'pong-service', () => Promise.resolve());
+    const result = await runOnce('evt-1', 'notification-service', () => Promise.resolve());
     expect(result).toBe('processed');
   });
 

@@ -38,51 +38,64 @@ Nhận HTTP từ trình duyệt, chuyển xuống service phía sau qua NATS.
 | ------------------------------------------ | ------------------------------------------- |
 | `src/main.ts`                              | Điểm khởi động. Gọi `createService()`       |
 | `src/app.module.ts`                        | Khai báo gateway có những gì                |
-| `src/ping/ping.controller.ts`              | Các route HTTP `/v1/ping/*`                 |
+| `src/auth/auth.controller.ts`              | Route `/v1/auth/*` — đăng ký, đăng nhập     |
+| `src/auth/jwt.guard.ts`                    | Guard toàn cục, **đóng mặc định**           |
+| `src/auth/cookies.ts`                      | Đặt/xoá refresh cookie httpOnly             |
+| `src/profiles/profile.controller.ts`       | Route `/v1/profiles/*`                      |
 | `src/health/gateway-health.controller.ts`  | `/health/live`, `/health/ready`, `/metrics` |
 | `src/common/request-context.middleware.ts` | Gắn `requestId` + `traceId` cho mỗi request |
 
 **Gateway không có database và không chứa logic nghiệp vụ.** Mỗi khi định viết `if` nghiệp vụ ở đây, hãy hỏi: logic này thuộc service nào?
 
-### `apps/ping-service` — service mẫu (bên PHÁT event)
+### `apps/identity-service` — bên PHÁT event
 
-| File                          | Việc                                                      |
-| ----------------------------- | --------------------------------------------------------- |
-| `src/main.ts`                 | Khởi động                                                 |
-| `src/app.module.ts`           | Bật `outbox: true` vì service này phát event              |
-| `src/echo/echo.controller.ts` | Nhận lệnh từ NATS (`@MessagePattern`)                     |
-| `src/echo/echo.service.ts`    | **Logic nghiệp vụ** — ghi DB + outbox trong 1 transaction |
-| `src/echo/echo.schema.ts`     | Hình dạng dữ liệu trong MongoDB                           |
+Chia bốn tầng. Ranh giới giữa chúng được ESLint ép, không phải thoả thuận miệng.
 
-### `apps/pong-service` — service mẫu (bên NGHE event)
+| Thư mục            | Việc                                                                    |
+| ------------------ | ----------------------------------------------------------------------- |
+| `src/api/`         | Nhận lệnh từ NATS (`@MessagePattern`) — ranh giới duy nhất              |
+| `src/application/` | **Điều phối**: mở transaction, ghi DB + outbox cùng lúc                 |
+| `src/domain/`      | Logic thuần: băm mật khẩu, ký JWT, PKCE. Không biết DB, không biết NATS |
+| `src/persistence/` | Mongoose schema                                                         |
 
-| File                                  | Việc                                                |
-| ------------------------------------- | --------------------------------------------------- |
-| `src/app.module.ts`                   | Bật `consumeEvents: true` vì service này nghe event |
-| `src/received/echo.handlers.ts`       | **Xử lý event** (`@OnEvent`)                        |
-| `src/received/received.controller.ts` | API đọc dữ liệu đã nhận                             |
-| `src/received/received.schema.ts`     | Hình dạng dữ liệu                                   |
+Vì sao `application/` tách khỏi `domain/`: logic auth phải mở transaction trải
+dài qua nhiều collection, nên nó buộc phải biết Mongoose — mà `domain/` thì
+không được biết. Xem [docs/09](09-project-structure.md).
 
-> `ping-service` và `pong-service` là **giàn giáo tạm**, sẽ xoá ở Phase 1. Chúng tồn tại để chứng minh đường dây đúng trước khi có nghiệp vụ thật.
+### `apps/notification-service` — bên NGHE event
+
+| File                                             | Việc                                                |
+| ------------------------------------------------ | --------------------------------------------------- |
+| `src/app.module.ts`                              | Bật `consumeEvents: true` vì service này nghe event |
+| `src/events/identity.handlers.ts`                | **Xử lý event** (`@OnEvent`)                        |
+| `src/domain/templates.ts`                        | Nội dung email (HTML + text)                        |
+| `src/persistence/schemas/email-outbox.schema.ts` | Hàng đợi email, `eventId` unique                    |
+| `src/infra/email-relay.service.ts`               | Gửi email — **ngoài** transaction                   |
+
+Chi tiết dễ bỏ qua: handler KHÔNG gửi email, nó chỉ ghi vào hàng đợi. Gửi email
+trong transaction idempotency nghĩa là khi transaction rollback, email đã bay đi
+rồi — không rút lại được.
 
 ### `packages/contracts` — bản hợp đồng
 
 Nơi khai báo **mọi thứ đi qua lại giữa các service**. Cả bên gửi lẫn bên nhận đều import từ đây, nên không thể lệch nhau mà TypeScript không báo.
 
-| File                  | Việc                                                   |
-| --------------------- | ------------------------------------------------------ |
-| `src/envelope.ts`     | Khung chung của mọi event (`id`, `type`, `traceId`...) |
-| `src/events/ping.ts`  | Hình dạng dữ liệu của event `ping.echo.created`        |
-| `src/events/index.ts` | **`EVENT_REGISTRY`** — danh bạ mọi event               |
-| `src/rpc/ping.ts`     | Hình dạng request/response                             |
-| `src/rpc/index.ts`    | **`RPC_REGISTRY`** — danh bạ mọi lệnh gọi              |
-| `src/errors.ts`       | Mã lỗi (`NOT_FOUND`, `VALIDATION_FAILED`...)           |
+| File                     | Việc                                                       |
+| ------------------------ | ---------------------------------------------------------- |
+| `src/envelope.ts`        | Khung chung của mọi event (`id`, `type`, `traceId`...)     |
+| `src/events/identity.ts` | Hình dạng payload từng event của identity                  |
+| `src/events/index.ts`    | **`EVENT_REGISTRY`** — danh bạ mọi event                   |
+| `src/rpc/*.ts`           | Hình dạng request/response từng nhóm lệnh                  |
+| `src/rpc/index.ts`       | **`RPC_REGISTRY`** — danh bạ mọi lệnh gọi                  |
+| `src/fixtures.ts`        | **`EVENT_FIXTURES`** — payload mẫu, dùng cho contract test |
+| `src/errors.ts`          | Mã lỗi (`NOT_FOUND`, `VALIDATION_FAILED`...)               |
+| `test/snapshots/`        | Hình dạng hợp đồng đang chạy thật — chặn breaking change   |
 
 Nhờ hai "danh bạ" này, gõ sai tên lệnh là **lỗi lúc build**, không phải lỗi lúc chạy:
 
 ```ts
-rpc.request('ping.echo.create', { message: 'hi' }); // ✅
-rpc.request('ping.echo.craete', { message: 'hi' }); // ❌ TypeScript báo ngay
+rpc.request('identity.auth.login', { email, password, ctx }); // ✅
+rpc.request('identity.auth.lgoin', { email, password, ctx }); // ❌ TypeScript báo ngay
 ```
 
 ### `packages/service-kit` — bộ khung dùng chung
@@ -141,7 +154,7 @@ Phần quan trọng nhất của dự án. Mọi service đều dựa vào đây
 
 ## 3. Flow 1 — Service khởi động như thế nào
 
-Chạy `node apps/ping-service/dist/main.js`:
+Chạy `node apps/identity-service/dist/main.js`:
 
 ```
 main.ts
@@ -196,7 +209,7 @@ createService({ moduleFactory: async () => (await import('./app.module')).AppMod
 
 ## 4. Flow 2 — Một request HTTP đi qua đâu
 
-Ví dụ: `curl -X POST localhost:4000/v1/ping/echo -d '{"message":"hello"}'`
+Ví dụ: `curl -X POST localhost:4000/v1/auth/login -d '{"email":"...","password":"..."}'`
 
 ```
 TRÌNH DUYỆT / curl
@@ -209,8 +222,8 @@ TRÌNH DUYỆT / curl
 │      (nhờ đó mọi dòng log sau này tự có requestId)        │
 │         │                                                 │
 │         ▼                                                 │
-│  ping/ping.controller.ts  @Post('echo')                   │
-│    → zodPipe(createEchoRequest) kiểm tra dữ liệu          │
+│  auth/auth.controller.ts  @Post('login')                  │
+│    → zodPipe(loginRequest) kiểm tra dữ liệu               │
 │       Sai hình dạng → trả 400 NGAY, không gọi xuống dưới  │
 │         │                                                 │
 │         ▼                                                 │
@@ -219,32 +232,34 @@ TRÌNH DUYỆT / curl
 │    ├─ rpc-payload.ts      — gói thêm requestId + traceparent│
 │    └─ gửi qua NATS, chờ tối đa 2 giây                     │
 └──────────────────────────┬───────────────────────────────┘
-                           │ NATS  "ping.echo.create"
+                           │ NATS  "identity.auth.login"
                            ▼
-┌─ PING-SERVICE (process 2) ───────────────────────────────┐
+┌─ IDENTITY-SERVICE (process 2) ───────────────────────────┐
 │                                                           │
 │  service-kit/rpc/rpc-context.interceptor.ts               │
 │    → khôi phục requestId + traceId của bên gọi            │
 │         │                                                  │
 │         ▼                                                  │
-│  echo/echo.controller.ts  @MessagePattern('ping.echo.create')│
+│  api/auth.controller.ts  @MessagePattern('identity.auth.login')│
 │    → chỉ parse dữ liệu rồi gọi xuống, KHÔNG có logic       │
 │         │                                                  │
 │         ▼                                                  │
-│  echo/echo.service.ts      ← LOGIC NGHIỆP VỤ Ở ĐÂY        │
+│  application/auth.service.ts   ← ĐIỀU PHỐI Ở ĐÂY          │
+│    │  (domain/password.service.ts so khớp mật khẩu,        │
+│    │   domain/token.service.ts ký JWT — cả hai thuần)      │
 │    │                                                       │
 │    └─ outbox.withTransaction(async (session) => {          │
-│         ① ghi vào bảng `echoes`          (dùng session)    │
+│         ① ghi vào bảng `sessions`        (dùng session)    │
 │         ② ghi vào bảng `outbox`          (dùng session)    │
 │       })                                                   │
 │       ↑ MỘT transaction — cùng thành công hoặc cùng huỷ    │
 └───────────────────────────────────────────────────────────┘
                            │ trả kết quả ngược lên
                            ▼
-                   HTTP 201 về trình duyệt
+          HTTP 201 + cookie httpOnly về trình duyệt
 ```
 
-**Điểm then chốt:** bước ① và ② nằm trong **một transaction**. Nếu máy sập giữa hai bước, cả hai cùng bị huỷ — không bao giờ có chuyện dữ liệu đã lưu mà thông báo không được gửi.
+**Điểm then chốt:** bước ① và ② nằm trong **một transaction**. Nếu máy sập giữa hai bước, cả hai cùng bị huỷ — không bao giờ có chuyện phiên đăng nhập đã tạo mà email cảnh báo "thiết bị lạ" không bao giờ được gửi.
 
 ---
 
@@ -253,7 +268,7 @@ TRÌNH DUYỆT / curl
 Tiếp nối flow trên. Dữ liệu đã nằm trong bảng `outbox`, nhưng **chưa ai biết**.
 
 ```
-┌─ PING-SERVICE ───────────────────────────────────────────┐
+┌─ IDENTITY-SERVICE ───────────────────────────────────────┐
 │  outbox/outbox.relay.ts                                   │
 │    chạy nền, cứ 1 giây một lần:                          │
 │      ① tìm bản ghi status='pending'                       │
@@ -265,11 +280,11 @@ Tiếp nối flow trên. Dữ liệu đã nằm trong bảng `outbox`, nhưng **
 │    Event KHÔNG BAO GIỜ mất.                               │
 └────────────────────────┬─────────────────────────────────┘
                          │ NATS JetStream  (lưu bền 7 ngày)
-                         │ "nekoflix.events.ping.echo.created"
+                         │ "nekoflix.events.identity.user.logged_in"
                          ▼
-┌─ PONG-SERVICE ───────────────────────────────────────────┐
+┌─ NOTIFICATION-SERVICE ───────────────────────────────────┐
 │  events/jetstream.consumer.ts                             │
-│    ① tìm hàm có @OnEvent('ping.echo.created')             │
+│    ① tìm hàm có @OnEvent('identity.user.logged_in')       │
 │    ② khôi phục traceId (nối trace xuyên service)          │
 │    ③ gọi idempotency.runOnce(...)                         │
 │         │                                                  │
@@ -277,9 +292,12 @@ Tiếp nối flow trên. Dữ liệu đã nằm trong bảng `outbox`, nhưng **
 │         │    Trùng khoá → event này xử lý rồi → bỏ qua    │
 │         │                                                  │
 │         └─ rồi mới gọi handler:                           │
-│              received/echo.handlers.ts                     │
-│                → ghi vào bảng `received`                  │
+│              events/identity.handlers.ts                   │
+│                → ghi vào bảng `emailoutboxes`             │
 │            (cả hai trong MỘT transaction)                 │
+│                                                            │
+│    Email được GỬI bởi relay riêng, NGOÀI transaction —    │
+│    gửi trong transaction thì rollback không rút mail lại  │
 │                                                            │
 │    ④ thành công → ack (báo NATS đã xong)                  │
 │       thất bại  → thử lại 1s, 5s, 25s, 125s               │
@@ -319,19 +337,19 @@ Quy tắc `override: false` quan trọng: trên CI, biến môi trường do Git
 
 ### Chuỗi kết nối MongoDB được dựng ra sao
 
-Trong `service-kit.module.ts`, hàm `buildMongoUri('nekoflix_ping')`:
+Trong `service-kit.module.ts`, hàm `buildMongoUri('nekoflix_identity')`:
 
 ```
 Có MONGO_URI?  →  dùng luôn (dành cho Atlas / production)
 Không          →  tự ghép:
 
-   nekoflix_ping  →  bỏ tiền tố  →  ping  →  user: ping_svc
+   nekoflix_identity  →  bỏ tiền tố  →  identity  →  user: identity_svc
                                                  │
-   mongodb://ping_svc:devpassword@localhost:27017/nekoflix_ping
+   mongodb://identity_svc:devpassword@localhost:27017/nekoflix_identity
             ?replicaSet=rs0&directConnection=true&authSource=admin
 ```
 
-Mỗi service dùng **tài khoản riêng chỉ vào được database của mình**. `ping_svc` đọc `nekoflix_pong` sẽ bị MongoDB từ chối. Đó là chủ đích — xem [ADR-012](adr/012-database-per-service.md).
+Mỗi service dùng **tài khoản riêng chỉ vào được database của mình**. `identity_svc` đọc `nekoflix_notification` sẽ bị MongoDB từ chối. Đó là chủ đích — xem [ADR-012](adr/012-database-per-service.md).
 
 ### Biến môi trường ai dùng
 
@@ -350,10 +368,10 @@ Mỗi service dùng **tài khoản riêng chỉ vào được database của mì
 
 ```
 apps/gateway  ─┐
-apps/ping     ─┼─→  @nekoflix/service-kit  ─→  @nekoflix/contracts
-apps/pong     ─┘                           ─→  (nestjs, mongoose, nats)
+apps/identity ─┼─→  @nekoflix/service-kit  ─→  @nekoflix/contracts
+apps/notif    ─┘                           ─→  (nestjs, mongoose, nats)
 
-❌ apps/ping  ──X──  apps/pong        (service KHÔNG import service)
+❌ apps/identity ──X── apps/notif     (service KHÔNG import service)
 ❌ service-kit ──X──  apps/*          (thư viện KHÔNG biết app nào dùng mình)
 ```
 
@@ -361,11 +379,11 @@ Quy tắc 1 được **ESLint chặn thật**, không phải chỉ ghi trong tà
 
 ```bash
 $ pnpm lint
-'../../ping-service/src/echo/echo.service' import is restricted.
+'../../identity-service/src/application/auth.service' import is restricted.
 Service không được import service khác. Dùng RpcClient (sync) hoặc @OnEvent (async)
 ```
 
-Thử nghiệm được: tạo một file trong `apps/gateway/src/` import từ `apps/ping-service/`, chạy `pnpm lint` sẽ thấy báo lỗi.
+Thử nghiệm được: tạo một file trong `apps/gateway/src/` import từ `apps/identity-service/`, chạy `pnpm lint` sẽ thấy báo lỗi.
 
 ### Phân lớp bên trong một service
 
@@ -385,7 +403,7 @@ Dấu hiệu sai: thấy `if` nghiệp vụ trong controller, hoặc thấy cont
 `turbo.json` quy định `packages/` phải build xong mới tới `apps/`:
 
 ```
-contracts  →  service-kit  →  gateway, ping-service, pong-service
+contracts  →  service-kit  →  gateway, identity-service, notification-service
                                   (3 cái này build song song)
 ```
 
@@ -400,13 +418,13 @@ Vì `service-kit` import `contracts`, và các app import cả hai. Sửa code t
 ```
 1. apps/gateway/src/main.ts                      ← bắt đầu
 2. packages/service-kit/src/bootstrap.ts         ← khởi động làm gì
-3. apps/gateway/src/ping/ping.controller.ts      ← nhận HTTP
+3. apps/gateway/src/auth/auth.controller.ts      ← nhận HTTP
 4. packages/service-kit/src/rpc/rpc-client.ts    ← gọi service khác
-5. apps/ping-service/src/echo/echo.controller.ts ← nhận lệnh
-6. apps/ping-service/src/echo/echo.service.ts    ← ⭐ logic + outbox
+5. apps/identity-service/src/api/auth.controller.ts        ← nhận lệnh
+6. apps/identity-service/src/application/auth.service.ts   ← ⭐ logic + outbox
 7. packages/service-kit/src/outbox/outbox.relay.ts       ← phát event
 8. packages/service-kit/src/events/jetstream.consumer.ts ← nhận event
-9. apps/pong-service/src/received/echo.handlers.ts       ← xử lý
+9. apps/notification-service/src/events/identity.handlers.ts  ← xử lý
 ```
 
 File số **6** và **8** là hai file đáng đọc kỹ nhất — chúng chứa toàn bộ cái khó của kiến trúc này.

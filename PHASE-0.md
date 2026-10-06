@@ -1,5 +1,14 @@
 # Phase 0 — Nền móng phân tán
 
+> **Tài liệu lịch sử.** Phase 0 đã xong và `ping-service`/`pong-service` — giàn
+> giáo dùng để chứng minh đường dây — **đã bị xoá ở Phase 1**, khi
+> identity-service và notification-service thay vào đúng vai trò đó.
+>
+> Các lệnh `pnpm dev:ping`, `curl /v1/ping/*` bên dưới không còn chạy được. Giữ
+> file này vì phần giải thích _vì sao_ vẫn đúng nguyên: outbox, idempotency, trace
+> xuyên service là nền của mọi service sau. Để chạy thử hôm nay, dùng
+> [COMMANDS.md](COMMANDS.md).
+
 Trạng thái: **đã implement và CHẠY THẬT**. Toàn bộ definition of done đã kiểm chứng trên máy.
 
 ```
@@ -165,30 +174,35 @@ Ghi lại để tài liệu và code không nói hai chuyện khác nhau.
 
 ---
 
-## 5. Bước tiếp theo — Phase 1
+## 5. Bước tiếp theo — Phase 1 (đã xong)
 
 Theo [roadmap](docs/11-roadmap.md): `identity-service` (~2.5 tuần).
 
 ```bash
-# 1. Xóa walking skeleton
+# 1. Xóa walking skeleton  — ĐÃ LÀM
 rm -rf apps/ping-service apps/pong-service
 #    + xóa 'ping'/'pong' khỏi infra/mongo/init-users.js
 #    + xóa events/ping.ts, rpc/ping.ts khỏi packages/contracts
 #    + xóa apps/gateway/src/ping/
 
-# 2. Tạo identity-service theo đúng khuôn của ping-service
+# 2. Tạo identity-service theo đúng khuôn đó  — ĐÃ LÀM
 ```
 
 Checklist Phase 1:
 
-- [ ] Schema `users`, `profiles`, `sessions`, `verificationTokens`
-- [ ] argon2id + register + email verify
-- [ ] Access token RS256 + refresh cookie
-- [ ] **Refresh rotation + reuse detection + grace period** ← phần khó nhất
-- [ ] OAuth Google/GitHub (PKCE + exchange code)
-- [ ] Multi-profile, PIN, kids mode
-- [ ] Gateway verify JWT một lần, gắn claim vào `RpcPayload.meta`
-- [ ] Event: `user.registered`, `user.logged_in`, `profile.created`, `security.alert`
-- [ ] Contract test cho mọi event
+- [x] Schema `users`, `profiles`, `sessions`, `verificationTokens`
+- [x] argon2id + register + email verify
+- [x] Access token RS256 + refresh cookie
+- [x] **Refresh rotation + reuse detection + grace period** ← phần khó nhất
+- [x] OAuth Google/GitHub (PKCE + exchange code)
+- [x] Multi-profile, PIN, kids mode
+- [x] Gateway verify JWT một lần, gắn claim vào `RpcPayload.meta`
+- [x] Event: `user.registered`, `user.logged_in`, `profile.created`, `security.alert`
+- [x] Contract test cho mọi event — producer, consumer, và snapshot tương thích ngược
+
+Một thay đổi so với kế hoạch: `identity-service` có thêm tầng `application/` mà
+`ping-service` không có. Logic auth phải mở transaction trải qua nhiều
+collection nên buộc phải biết Mongoose, trong khi `domain/` không được biết —
+ESLint chặn thật. Xem [docs/09](docs/09-project-structure.md).
 
 **Trước khi sang Phase 2**, kiểm tra [ma trận phụ thuộc](docs/13-service-catalog.md#ma-trận-phụ-thuộc): nếu số lời gọi sync tăng ngoài dự kiến, ranh giới service đang sai — gộp lại trước khi đi tiếp.

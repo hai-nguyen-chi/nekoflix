@@ -36,7 +36,7 @@ export class OutboxService {
    * ```ts
    * await outbox.withTransaction(async (session) => {
    *   await this.echoes.create([doc], { session });
-   *   await this.outbox.publish('ping.echo.created', payload, { session });
+   *   await this.outbox.publish('identity.user.registered', payload, { session });
    * });
    * ```
    */

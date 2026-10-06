@@ -149,7 +149,7 @@ function doImport(fileArg?: string): void {
 
   console.log(`
   Xong. Khởi động lại service để Mongoose tạo lại index:
-    pnpm dev:ping
+    pnpm dev:auth
 `);
 }
 

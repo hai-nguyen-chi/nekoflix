@@ -24,7 +24,6 @@ import { MongoClient } from 'mongodb';
 import { config as loadDotenv } from 'dotenv';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { pingSeed } from './seeds/ping.seed';
 import type { Seed } from './types';
 
 if (existsSync(resolve(process.cwd(), '.env'))) {
@@ -33,7 +32,6 @@ if (existsSync(resolve(process.cwd(), '.env'))) {
 
 /** Thứ tự quan trọng: seed phụ thuộc phải chạy trước */
 const SEEDS: Seed[] = [
-  pingSeed,
   // Phase 1:  identitySeed,
   // Phase 2:  catalogSeed,
   // Phase 3:  mediaSeed, activitySeed,

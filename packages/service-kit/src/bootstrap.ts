@@ -22,7 +22,7 @@ export interface CreateServiceOptions {
    *
    * ```ts
    * await createService({
-   *   name: 'ping-service',
+   *   name: 'identity-service',
    *   moduleFactory: async () => (await import('./app.module')).AppModule,
    *   healthPort: 4101,
    * });

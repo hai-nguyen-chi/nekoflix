@@ -8,7 +8,6 @@ import { OAuthController } from './auth/oauth.controller';
 import { PasswordController } from './auth/password.controller';
 import { RequestContextMiddleware } from './common/request-context.middleware';
 import { GatewayHealthController } from './health/gateway-health.controller';
-import { PingController } from './ping/ping.controller';
 
 @Module({
   imports: [
@@ -23,7 +22,6 @@ import { PingController } from './ping/ping.controller';
   ],
   controllers: [
     GatewayHealthController,
-    PingController,
     AuthController,
     ProfileController,
     OAuthController,

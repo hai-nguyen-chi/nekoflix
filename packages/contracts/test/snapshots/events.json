@@ -1,0 +1,202 @@
+{
+  "identity.user.registered.v1": {
+    "displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "registeredAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "verificationExpiresAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "verificationToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.user.verified.v1": {
+    "email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "verifiedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.user.logged_in.v1": {
+    "deviceLabel": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "ip": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "isNewDevice": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "loggedInAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.security.alert.v1": {
+    "detail": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "ip": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "occurredAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": ["all_sessions_revoked", "password_changed", "token_reuse_detected"]
+    },
+    "userAgent": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.created.v1": {
+    "createdAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "isKid": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.profile.deleted.v1": {
+    "deletedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "profileId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "identity.password.reset_requested.v1": {
+    "displayName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "email": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "expiresAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "ip": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "requestedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "resetToken": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "userId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  }
+}

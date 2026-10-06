@@ -1,5 +1,4 @@
 import type { z } from 'zod';
-import { pingEchoCreatedV1 } from './ping';
 import {
   passwordResetRequestedV1,
   profileCreatedV1,
@@ -10,7 +9,6 @@ import {
   userVerifiedV1,
 } from './identity';
 
-export * from './ping';
 export * from './identity';
 
 /**
@@ -22,8 +20,6 @@ export * from './identity';
  * Checklist khi thêm event: xem docs/14-inter-service-communication.md §9
  */
 export const EVENT_REGISTRY = {
-  'ping.echo.created': { version: 1, schema: pingEchoCreatedV1 },
-
   'identity.user.registered': { version: 1, schema: userRegisteredV1 },
   'identity.user.verified': { version: 1, schema: userVerifiedV1 },
   'identity.user.logged_in': { version: 1, schema: userLoggedInV1 },

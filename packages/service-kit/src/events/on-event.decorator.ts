@@ -9,8 +9,8 @@ export const ON_EVENT_METADATA = 'nekoflix:on_event';
  * ```ts
  * @Injectable()
  * export class EchoHandlers {
- *   @OnEvent('ping.echo.created')
- *   async onCreated(event: EventEnvelope<PingEchoCreatedV1>) { ... }
+ *   @OnEvent('identity.user.registered')
+ *   async onRegistered(event: EventEnvelope<UserRegisteredV1>) { ... }
  * }
  * ```
  *

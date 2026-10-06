@@ -79,25 +79,27 @@ Xem [docs/10-devops-setup.md](docs/10-devops-setup.md).
 ```bash
 pnpm install
 cp .env.example .env
+pnpm gen:secrets            # sinh khoá RSA ký JWT
 pnpm infra:up               # mongo, redis, nats, storage, jaeger, mailpit
 pnpm build && pnpm db:seed
 
-pnpm dev:ping               # gateway + ping-service + pong-service
+pnpm dev:auth               # gateway + identity + notification + web
 ```
 
 Cửa sổ thứ hai: `pnpm smoke` để kiểm chứng toàn bộ đường dây.
 
 ## Trạng thái
 
-🟢 **Phase 0 xong** — nền móng phân tán chạy được end-to-end. Xem [PHASE-0.md](PHASE-0.md).
-⬜ Phase 1 (identity-service) — tiếp theo. Xem [Roadmap](docs/11-roadmap.md).
+🟢 **Phase 0 xong** — nền móng phân tán. Giàn giáo `ping/pong` đã được xoá, xem [PHASE-0.md](PHASE-0.md).
+🟢 **Phase 1 xong** — identity-service (auth, multi-profile, OAuth, quên mật khẩu), notification-service, frontend.
+⬜ Phase 2 (catalog-service) — tiếp theo. Xem [Roadmap](docs/11-roadmap.md).
 
 ```
-pnpm build               5/5 xanh
-pnpm lint                5/5 xanh    (rào chắn kiến trúc, đã kiểm chứng chặn thật)
-pnpm typecheck           7/7 xanh
-pnpm test                22/22 xanh  (transaction thật trên MongoDB replica set)
-pnpm smoke               10/10 đạt   (hạ tầng Docker thật)
-pnpm verify:idempotency  ĐẠT
+pnpm build               6/6 xanh
+pnpm lint                6/6 xanh    (rào chắn kiến trúc, đã kiểm chứng chặn thật)
+pnpm typecheck           8/8 xanh
+pnpm test                162 xanh    (gồm contract test producer + consumer)
+pnpm smoke               đạt         (hạ tầng Docker thật)
+pnpm verify:idempotency  đạt
 Jaeger                   trace liền mạch qua 3 service
 ```

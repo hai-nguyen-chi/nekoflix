@@ -20,9 +20,6 @@ const SERVICES = [
   'billing',
   'notification',
   'reco',
-  // Service tạm của Phase 0 — xóa khi sang Phase 1
-  'ping',
-  'pong',
 ];
 
 const password = globalThis.SERVICE_DB_PASSWORD || 'devpassword';

@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   check:
-    name: Lint · Typecheck · Build
+    name: Lint · Typecheck · Build · Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +25,10 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm format:check
+      # Gồm cả contract test: producer và consumer có còn nói cùng một
+      # ngôn ngữ không. Đây là thứ bắt lỗi breaking change TRƯỚC khi nó
+      # ra tới hạ tầng thật ở job dưới.
+      - run: pnpm test
 
   integration:
     name: Smoke test (hạ tầng thật)
@@ -45,29 +49,31 @@ jobs:
       - name: Khởi động hạ tầng
         run: |
           cp .env.example .env
-          docker compose -f infra/docker-compose.yml up -d --wait mongo redis nats jaeger
+          # Sinh cặp khoá RSA cho JWT — .env.example để trống có chủ đích,
+          # khoá ký token không bao giờ được nằm trong repo.
+          pnpm gen:secrets
+          docker compose -f infra/docker-compose.yml up -d --wait mongo redis nats jaeger mailpit
           docker compose -f infra/docker-compose.yml up mongo-init
 
       - name: Chạy service nền
         run: |
-          node apps/ping-service/dist/main.js  > /tmp/ping.log  2>&1 &
-          node apps/pong-service/dist/main.js  > /tmp/pong.log  2>&1 &
-          node apps/gateway/dist/main.js       > /tmp/gw.log    2>&1 &
+          node apps/identity-service/dist/main.js     > /tmp/identity.log     2>&1 &
+          node apps/notification-service/dist/main.js > /tmp/notification.log 2>&1 &
+          node apps/gateway/dist/main.js              > /tmp/gw.log           2>&1 &
           npx wait-on -t 60000 http://localhost:4000/health/ready \
-                               http://localhost:4101/health/ready \
-                               http://localhost:4102/health/ready
-        env:
-          MONGO_HOST: localhost:27017
-          NATS_URL: nats://localhost:4222
-          SERVICE_DB_PASSWORD: devpassword
-          OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://localhost:4318/v1/traces
+                               http://localhost:4001/health/ready \
+                               http://localhost:4007/health/ready
 
       - run: pnpm smoke
+
+      # Chạy riêng vì nó ÉP một tình huống không xảy ra ở luồng bình thường:
+      # cùng một event được giao nhiều lần.
+      - run: pnpm verify:idempotency
 
       - name: Log khi thất bại
         if: failure()
         run: |
-          echo "─── gateway ───";      cat /tmp/gw.log   || true
-          echo "─── ping-service ───"; cat /tmp/ping.log || true
-          echo "─── pong-service ───"; cat /tmp/pong.log || true
+          echo "─── gateway ───";              cat /tmp/gw.log           || true
+          echo "─── identity-service ───";     cat /tmp/identity.log     || true
+          echo "─── notification-service ───"; cat /tmp/notification.log || true
           docker compose -f infra/docker-compose.yml logs --tail=80

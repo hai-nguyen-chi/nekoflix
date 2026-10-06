@@ -49,7 +49,7 @@ async function createEchoWithEvent(message: string, opts: { failAfterWrite?: boo
         [
           {
             eventId: `evt-${message}`,
-            type: 'ping.echo.created',
+            type: 'identity.user.registered',
             version: 1,
             occurredAt: new Date(),
             producer: 'test@0.1.0',
@@ -72,7 +72,7 @@ describe('Transactional Outbox', () => {
     await createEchoWithEvent('alpha');
 
     expect(await Echoes.countDocuments()).toBe(1);
-    const event = await Outbox.findOne({ type: 'ping.echo.created' }).lean();
+    const event = await Outbox.findOne({ type: 'identity.user.registered' }).lean();
     expect(event).toBeTruthy();
     expect(event?.status).toBe('pending');
     expect((event?.data as { message: string }).message).toBe('alpha');
@@ -137,7 +137,7 @@ describe('Transactional Outbox', () => {
     await expect(
       Outbox.create({
         eventId: 'evt-eta',
-        type: 'ping.echo.created',
+        type: 'identity.user.registered',
         version: 1,
         occurredAt: new Date(),
         producer: 'test@0.1.0',

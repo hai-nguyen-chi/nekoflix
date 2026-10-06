@@ -1,13 +1,5 @@
 import type { z } from 'zod';
 import {
-  createEchoRequest,
-  createEchoResponse,
-  listEchoesResponse,
-  listReceivedResponse,
-  pingRequest,
-  pingResponse,
-} from './ping';
-import {
   getUserRequest,
   getUserResponse,
   listSessionsRequest,
@@ -66,14 +58,11 @@ import {
   markReadResponse,
 } from './notification';
 
-export * from './ping';
 export * from './identity';
 export * from './profile';
 export * from './oauth';
 export * from './password';
 export * from './notification';
-
-const empty = { parse: (v: unknown) => v } as unknown as z.ZodType<Record<string, never>>;
 
 /**
  * Nguồn sự thật cho mọi NATS request/reply.
@@ -83,11 +72,6 @@ const empty = { parse: (v: unknown) => v } as unknown as z.ZodType<Record<string
  * lỗi compile-time, không phải lỗi runtime lúc 2 giờ sáng.
  */
 export const RPC_REGISTRY = {
-  'ping.echo.ping': { request: pingRequest, response: pingResponse },
-  'ping.echo.create': { request: createEchoRequest, response: createEchoResponse },
-  'ping.echo.list': { request: empty, response: listEchoesResponse },
-  'pong.received.list': { request: empty, response: listReceivedResponse },
-
   'identity.auth.register': { request: registerRequest, response: registerResponse },
   'identity.auth.login': { request: loginRequest, response: loginResponse },
   'identity.auth.refresh': { request: refreshRequest, response: refreshResponse },

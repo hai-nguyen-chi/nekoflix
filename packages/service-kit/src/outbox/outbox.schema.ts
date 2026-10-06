@@ -24,7 +24,7 @@ export class OutboxEvent {
   @Prop({ type: String, required: true, unique: true })
   eventId!: string;
 
-  /** vd 'ping.echo.created' */
+  /** vd 'identity.user.registered' */
   @Prop({ type: String, required: true })
   type!: string;
 

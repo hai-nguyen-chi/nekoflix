@@ -25,19 +25,24 @@ Chia thành 7 phase. Mỗi phase có **definition of done** rõ ràng — không
   - [ ] pino + OpenTelemetry + prom-client cấu hình sẵn
   - [ ] `/health/live`, `/health/ready`
 - [ ] `packages/contracts` — Zod schema cho event envelope + vài event đầu
-- [ ] **`gateway` + một service giả (`ping-service`)** chạy thông suốt
+- [ ] **`gateway` + một cặp service giả (`ping-service`/`pong-service`)** chạy thông suốt
 - [ ] Trace một request đi từ browser → gateway → ping-service → event → consumer, **nhìn thấy đủ trên Jaeger**
 - [ ] `scripts/new-service.ts` — scaffold service mới
 - [ ] CI: lint, typecheck, test xanh
 
 **Done khi**:
 
-- `curl /ping` → gateway → NATS → ping-service → trả lời
+- `curl /v1/ping` → gateway → NATS → ping-service → trả lời
 - Ping-service ghi DB + outbox trong một transaction → relay publish → consumer nhận → thấy trong `processedEvents`
 - **Jaeger hiện một trace liền mạch qua cả 3 chặng** (HTTP → NATS request → NATS event)
 - Kill consumer giữa chừng, bật lại → event được giao lại, không xử lý hai lần
 
 > Nếu cuối tuần 3 mà trace chưa liền mạch, **dừng lại sửa cho xong**. Thiếu tracing trong hệ 9 service là mù hoàn toàn.
+
+> **Đã xong.** `ping-service` và `pong-service` là giàn giáo tạm, đã bị xoá khi
+> identity-service và notification-service thay thế vai trò của chúng ở Phase 1.
+> `pnpm smoke` và `pnpm verify:idempotency` giờ kiểm chứng đúng những điều trên,
+> nhưng trên luồng nghiệp vụ thật.
 
 ---
 

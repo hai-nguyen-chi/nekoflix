@@ -13,13 +13,13 @@ import { z } from 'zod';
 export const eventEnvelopeSchema = z.object({
   /** UUID — khóa idempotency ở phía consumer */
   id: z.string().uuid(),
-  /** vd 'ping.echo.created' */
+  /** vd 'identity.user.registered' */
   type: z.string().min(1),
   /** Schema version, bắt đầu từ 1 */
   version: z.number().int().positive(),
   /** Thời điểm sự kiện xảy ra (ISO 8601) */
   occurredAt: z.string().datetime(),
-  /** vd 'ping-service@0.1.0' */
+  /** vd 'identity-service@0.1.0' */
   producer: z.string().min(1),
   /** Nối vào distributed trace — dùng để lọc log */
   traceId: z.string(),
@@ -47,12 +47,12 @@ export const DLQ_SUBJECT_PREFIX = 'nekoflix.dlq';
 export const EVENT_STREAM_NAME = 'EVENTS';
 export const DLQ_STREAM_NAME = 'DLQ';
 
-/** 'ping.echo.created' -> 'nekoflix.events.ping.echo.created' */
+/** 'identity.user.registered' -> 'nekoflix.events.identity.user.registered' */
 export function eventSubject(type: string): string {
   return `${EVENT_SUBJECT_PREFIX}.${type}`;
 }
 
-/** 'nekoflix.events.ping.echo.created' -> 'ping.echo.created' */
+/** 'nekoflix.events.identity.user.registered' -> 'identity.user.registered' */
 export function eventTypeFromSubject(subject: string): string {
   return subject.startsWith(`${EVENT_SUBJECT_PREFIX}.`)
     ? subject.slice(EVENT_SUBJECT_PREFIX.length + 1)

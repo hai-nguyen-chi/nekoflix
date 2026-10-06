@@ -133,9 +133,14 @@ Done in 1m 42.4s
 
 ```bash
 cp .env.example .env
+pnpm gen:secrets
 ```
 
 File `.env` chứa thông tin kết nối (địa chỉ database, mật khẩu...). Nó **không được commit lên Git** — mỗi người một file riêng.
+
+`pnpm gen:secrets` sinh cặp khoá RSA để ký JWT và vài secret khác. Khoá ký token
+không bao giờ nằm trong repo, nên mỗi máy tự sinh khoá của mình. Chạy lại nhiều
+lần không làm mất secret đã có — nó chỉ điền vào chỗ còn trống.
 
 ---
 
@@ -158,7 +163,7 @@ Lần đầu Docker phải **tải ~2GB image** từ mạng → mất 5–15 ph�
  ✔ Container nekoflix-jaeger     Healthy
  ✔ Container nekoflix-mailpit    Healthy
 
-nekoflix-mongo-init    | Đã cấu hình 10 DB user.
+nekoflix-mongo-init    | Đã cấu hình 8 DB user.
 nekoflix-mongo-init    exited with code 0
 nekoflix-storage-init  | Buckets sẵn sàng:
 nekoflix-storage-init  |   nekoflix-media / nekoflix-public / nekoflix-uploads
@@ -184,33 +189,35 @@ Bước này dịch TypeScript sang JavaScript. Mất ~15 giây.
 <summary>Đúng thì thấy gì?</summary>
 
 ```
- Tasks:    5 successful, 5 total
+ Tasks:    6 successful, 6 total
 ```
 
 </details>
 
 ---
 
-### Bước 5: Chạy 3 service
+### Bước 5: Chạy hệ thống
 
 ```bash
-pnpm dev:ping
+pnpm dev:auth
 ```
 
-**Terminal này sẽ không trả lại con trỏ** — đó là bình thường, 3 service đang chạy trong đó. Để nguyên cửa sổ này.
+**Terminal này sẽ không trả lại con trỏ** — đó là bình thường, 3 service + giao
+diện web đang chạy trong đó. Để nguyên cửa sổ này.
 
 <details>
 <summary>Đúng thì thấy gì?</summary>
 
-Log màu từ 3 service trộn lẫn nhau, kết thúc bằng 3 dòng kiểu:
+Log màu từ các service trộn lẫn nhau, kết thúc bằng những dòng kiểu:
 
 ```
-INFO: gateway đã sẵn sàng          port: 4000
-INFO: ping-service đã sẵn sàng     port: 4101
-INFO: pong-service đã sẵn sàng     port: 4102
+INFO: gateway đã sẵn sàng                port: 4000
+INFO: identity-service đã sẵn sàng       port: 4001
+INFO: notification-service đã sẵn sàng   port: 4007
 INFO: đã kết nối NATS JetStream
 INFO: outbox relay đã khởi động
 INFO: JetStream consumer đã khởi động
+VITE ready                               http://localhost:5173
 ```
 
 </details>
@@ -231,33 +238,35 @@ pnpm smoke
 <summary>Đúng thì thấy gì?</summary>
 
 ```
-Nekoflix — smoke test Phase 0 (http://localhost:4000)
+Nekoflix — smoke test (http://localhost:4000)
 
-1. Health check
-  gateway /health/live ... OK
-  gateway /health/ready (NATS đã kết nối) ... OK
+1. Sức khoẻ hệ thống
+  gateway sẵn sàng ... OK
+  identity-service sẵn sàng ... OK
+  notification-service sẵn sàng ... OK
 
-2. HTTP -> NATS request/reply -> ping-service
-  POST /v1/ping trả lời từ ping-service ... OK
-  requestId được truyền xuống service ... OK
-  validate payload sai -> 400 VALIDATION_FAILED ... OK
+2. Đăng ký
+  tạo tài khoản mới ... OK
+  refresh token CHỈ nằm trong cookie httpOnly, không vào body ... OK
+  ...
 
-3. Outbox -> JetStream -> pong-service
-  echo đã ghi vào ping-service ... OK
-  event tới pong-service qua JetStream (<15s) ... OK
+3. identity -> outbox -> JetStream -> notification -> SMTP
+  email xác thực tới được Mailpit ... OK
+  token trong email dùng được để xác thực ... OK
 
-4. Transaction rollback
-  lỗi sau khi ghi -> rollback CẢ dữ liệu lẫn outbox ... OK
-  không có event mồ côi tới pong-service ... OK
-
-5. API composition ở gateway
-  GET /v1/ping/status ghép 2 service ... OK
+4. Refresh rotation và phát hiện token bị đánh cắp
+  refresh hợp lệ -> cấp token mới (rotation) ... OK
+  token cũ dùng lại NGAY -> vẫn chấp nhận (grace period) ... OK
+  token cũ dùng lại sau grace period -> TOKEN_REUSE_DETECTED ... OK
+  ...
 
 ────────────────────────────────────────────────────
-  10 đạt, 0 thất bại
+  20 đạt, 0 thất bại
 
-  Phase 0 ĐẠT.
+  ĐẠT.
 ```
+
+Mất khoảng 30 giây — có một bước cố ý chờ hết grace period 10 giây.
 
 </details>
 
@@ -275,18 +284,21 @@ Smoke test không kiểm được phần này, phải nhìn bằng mắt.
 **Phải thấy MỘT khối liền mạch** như thế này:
 
 ```
-gateway  POST /v1/ping/echo                              45.3ms
- └─ rpc ping.echo.create                                 43.0ms
-     ├─ [ping-service] mongoose.Echo.save                10.9ms   ← dữ liệu
-     ├─ [ping-service] mongoose.OutboxEvent.save          3.9ms   ← event, CÙNG transaction
-     └─ [pong-service] event ping.echo.created           33.4ms   ← qua JetStream
-         ├─ mongoose.ProcessedEvent.save                 13.6ms   ← chống xử lý 2 lần
-         └─ mongoose.Received.save                        4.4ms
+gateway  POST /v1/auth/register                                  250ms
+ └─ rpc identity.auth.register                                   240ms
+     ├─ [identity-service] mongoose.User.save                      12ms   ← dữ liệu
+     ├─ [identity-service] mongoose.OutboxEvent.save                4ms   ← event, CÙNG transaction
+     └─ [notification-service] event identity.user.registered      35ms   ← qua JetStream
+         ├─ mongoose.ProcessedEvent.save                           14ms   ← chống xử lý 2 lần
+         └─ mongoose.EmailOutbox.save                               4ms
 ```
+
+> Phần lớn 250ms là băm mật khẩu bằng argon2id — **cố ý chậm**, để kẻ có
+> được database không thể dò mật khẩu hàng loạt.
 
 Nếu thay vào đó bạn thấy **nhiều trace rời rạc** → trace context bị đứt, cần sửa trước khi làm tiếp.
 
-> **Tại sao quan trọng?** Hệ thống này có 9 service (hiện mới 3). Khi một request lỗi, nó đã đi qua 4–5 service rồi. Không có trace liền mạch thì gần như không thể tìm ra chỗ hỏng.
+> **Tại sao quan trọng?** Hệ thống này sẽ có 9 service (hiện mới 3). Khi một request lỗi, nó đã đi qua 4–5 service rồi. Không có trace liền mạch thì gần như không thể tìm ra chỗ hỏng.
 
 ---
 
@@ -296,34 +308,37 @@ Nếu thay vào đó bạn thấy **nhiều trace rời rạc** → trace contex
    Bạn gõ curl / mở trình duyệt
             │
             ▼
-   ┌─────────────────┐
-   │    gateway      │  cổng vào duy nhất (port 4000)
-   │                 │  không có database, không chứa nghiệp vụ
-   └────────┬────────┘
-            │ gửi tin qua NATS
-            ▼
-   ┌─────────────────┐
-   │  ping-service   │  ghi vào database của RIÊNG nó
-   │                 │  + ghi "thư báo" vào bảng outbox
-   └────────┬────────┘     (cả hai trong 1 transaction)
-            │
-            │ outbox relay đọc bảng outbox mỗi giây
-            │ rồi gửi lên NATS JetStream
-            ▼
-   ┌─────────────────┐
-   │  pong-service   │  nhận tin, ghi vào database RIÊNG của nó
-   └─────────────────┘
+   ┌──────────────────────┐
+   │       gateway        │  cổng vào duy nhất (port 4000)
+   │                      │  không có database, không chứa nghiệp vụ
+   └──────────┬───────────┘
+              │ gửi tin qua NATS
+              ▼
+   ┌──────────────────────┐
+   │   identity-service   │  ghi vào database của RIÊNG nó
+   │                      │  + ghi "thư báo" vào bảng outbox
+   └──────────┬───────────┘     (cả hai trong 1 transaction)
+              │
+              │ outbox relay đọc bảng outbox mỗi giây
+              │ rồi gửi lên NATS JetStream
+              ▼
+   ┌──────────────────────┐
+   │ notification-service │  nhận tin, xếp email vào hàng đợi
+   │                      │  rồi một relay riêng gửi qua SMTP
+   └──────────────────────┘
 ```
 
 ### Ba ý tưởng cốt lõi
 
 **1. Mỗi service có database riêng, không ai đọc của ai.**
 
-`ping-service` dùng database `nekoflix_ping`, `pong-service` dùng `nekoflix_pong`. Mỗi service có tài khoản MongoDB riêng chỉ mở được database của mình — đọc nhầm là lỗi ngay, không phải chuyện "nhớ đừng làm".
+`identity-service` dùng database `nekoflix_identity`, `notification-service` dùng `nekoflix_notification`. Mỗi service có tài khoản MongoDB riêng chỉ mở được database của mình — đọc nhầm là lỗi ngay, không phải chuyện "nhớ đừng làm".
+
+Hệ quả thực tế: notification-service **không tra được email của người dùng**. Nên email phải nằm sẵn trong event. Nhờ vậy identity có chết thì email vẫn gửi được bình thường.
 
 **2. Muốn báo tin cho service khác thì gửi "event", không gọi thẳng.**
 
-`ping-service` không biết `pong-service` tồn tại. Nó chỉ nói "tôi vừa tạo echo" lên NATS. Ai quan tâm thì nghe. Nhờ vậy tắt `pong-service` đi thì `ping-service` vẫn chạy bình thường.
+`identity-service` không biết `notification-service` tồn tại. Nó chỉ nói "có người vừa đăng ký" lên NATS. Ai quan tâm thì nghe. Nhờ vậy tắt `notification-service` đi thì đăng ký vẫn chạy bình thường — chỉ là email tới muộn hơn.
 
 **3. Outbox — chỗ dễ sai nhất.**
 
@@ -334,99 +349,87 @@ ghi vào database        ← xong
 gửi tin lên NATS        ← máy sập ở đây!
 ```
 
-Dữ liệu đã lưu nhưng tin không bao giờ được gửi. `pong-service` không bao giờ biết. **Và không có lỗi nào được báo ra** — hệ thống cứ thế lệch dần.
+Dữ liệu đã lưu nhưng tin không bao giờ được gửi. Người dùng có tài khoản nhưng **không bao giờ nhận được email xác thực**, và tài khoản đó kẹt vĩnh viễn ở trạng thái chưa xác thực. **Không có lỗi nào được báo ra** — hệ thống cứ thế lệch dần.
 
 Cách làm đúng: ghi dữ liệu **và** ghi "thư cần gửi" vào cùng một bảng, trong **cùng một transaction**. Hai cái cùng thành công hoặc cùng thất bại. Rồi một tiến trình riêng (`outbox relay`) đọc bảng đó và gửi đi.
 
-Đây chính là cái mà smoke test bước 4 kiểm tra.
+Đây chính là cái mà `pnpm smoke` bước 3 kiểm tra.
 
 ---
 
 ## Phần 5 — Nghịch thử để hiểu
 
-Giữ `pnpm dev:ping` chạy, mở terminal thứ hai.
+Giữ `pnpm dev:auth` chạy, mở terminal thứ hai.
 
-### Thử 1: Gửi một tin
-
-```bash
-curl -X POST localhost:4000/v1/ping/echo \
-  -H "Content-Type: application/json" \
-  -d '{"message":"thu nghiem"}'
-```
-
-Rồi xem bên nhận:
+### Thử 1: Đăng ký một tài khoản
 
 ```bash
-curl localhost:4000/v1/ping/received
+curl -X POST localhost:4000/v1/auth/register   -H "Content-Type: application/json"   -d '{"email":"thu@nekoflix.local","password":"Matkhau123","displayName":"Thu Nghiem"}'
 ```
 
-Thấy `thu nghiem` xuất hiện → tin đã đi hết đường dây.
+Rồi mở http://localhost:8025 (Mailpit). **Email xác thực đã nằm ở đó.**
+
+Email đó không do gateway gửi, cũng không do identity-service gửi. Nó đi qua ba
+chặng: identity ghi outbox → relay đẩy lên JetStream → notification nhận và xếp
+hàng → relay email gửi qua SMTP. Bạn vừa thấy toàn bộ đường dây hoạt động.
 
 ### Thử 2: Xem outbox hoạt động
 
-Mở http://localhost:8081 (Mongo Express) → chọn database `nekoflix_ping` → bảng `outbox`.
+Mở http://localhost:8081 (Mongo Express) → database `nekoflix_identity` → bảng `outbox`.
 
 Bạn sẽ thấy các bản ghi với `status: "published"` — đó là những "lá thư" đã được gửi đi.
 
-### Thử 3: Chứng minh rollback đúng
+Rồi sang database `nekoflix_notification` → bảng `emailoutboxes`: cùng một sự
+kiện, nhưng giờ là email đã gửi. Hai database tách biệt hoàn toàn.
+
+### Thử 3: Chứng minh ranh giới database là thật
 
 ```bash
-curl -X POST localhost:4000/v1/ping/echo \
-  -H "Content-Type: application/json" \
-  -d '{"message":"se-bi-huy","failAfterWrite":true}'
+docker exec nekoflix-mongo mongosh -u identity_svc -p devpassword   --authenticationDatabase admin --quiet   --eval 'db.getSiblingDB("nekoflix_notification").emailoutboxes.countDocuments()'
 ```
 
-Lệnh này cố ý gây lỗi **sau khi** đã ghi database + outbox. Trả về lỗi 500.
+Phải trả về **`Unauthorized`**. Nếu nó đọc được, MongoDB đang chạy thiếu `--auth`
+và toàn bộ tài khoản phân quyền chỉ là trang trí.
 
-Giờ kiểm tra:
+### Thử 4: Tắt notification-service, xem hệ thống xuống cấp ra sao
+
+Trong terminal đang chạy service, bấm `Ctrl+C`. Rồi chỉ chạy 2 service:
 
 ```bash
-curl localhost:4000/v1/ping/echo       # không có "se-bi-huy"
-curl localhost:4000/v1/ping/received   # cũng không có
+pnpm dev --filter=gateway --filter=identity-service
 ```
 
-Cả hai đều trống → transaction đã hủy sạch. **Không có "lá thư ma"** nào được gửi cho một dữ liệu không tồn tại.
-
-### Thử 4: Tắt một service, xem hệ thống xuống cấp ra sao
-
-Trong terminal đang chạy service, bấm `Ctrl+C` để tắt hết. Rồi chỉ chạy 2 service:
+Giờ `notification-service` không chạy. Đăng ký một tài khoản khác:
 
 ```bash
-pnpm dev --filter=gateway --filter=ping-service
+curl -X POST localhost:4000/v1/auth/register   -H "Content-Type: application/json"   -d '{"email":"khi-notif-chet@nekoflix.local","password":"Matkhau123","displayName":"Thu 2"}'
 ```
 
-Giờ `pong-service` không chạy. Thử:
-
-```bash
-curl localhost:4000/v1/ping/status
-```
-
-Kết quả:
-
-```json
-{ "data": { "published": 5, "delivered": null, "degraded": true, "pending": null } }
-```
-
-`degraded: true` — gateway vẫn trả lời, chỉ thiếu phần của `pong-service`. **Không sập.**
-
-Đây là thứ phải thiết kế có chủ đích: mỗi lời gọi phải trả lời trước câu hỏi "service kia chết thì sao?".
+**Vẫn trả 201.** Đăng ký không phụ thuộc vào việc email có gửi được hay không.
+Mailpit thì chưa có gì — đúng như mong đợi.
 
 ### Thử 5: Event không bị mất khi service chết
 
-Vẫn trong tình trạng `pong-service` đang tắt:
+Bật lại đầy đủ (`Ctrl+C` rồi `pnpm dev:auth`), chờ vài giây rồi xem Mailpit.
+
+Email cho `khi-notif-chet@nekoflix.local` **vẫn xuất hiện**. NATS JetStream đã
+giữ tin lại suốt thời gian notification-service tắt, và giao khi nó sống lại.
+
+Đây là khác biệt giữa "gửi tin" và "gọi hàm": lời gọi hàm tới một service đang
+chết thì mất luôn, còn event thì nằm chờ.
+
+### Thử 6: Phát hiện token bị đánh cắp
 
 ```bash
-curl -X POST localhost:4000/v1/ping/echo \
-  -H "Content-Type: application/json" -d '{"message":"gui-khi-pong-chet"}'
+pnpm verify:idempotency
 ```
 
-Giờ bật lại đầy đủ (`Ctrl+C` rồi `pnpm dev:ping`), chờ vài giây:
+Script này ép một tình huống không bao giờ xảy ra ở luồng bình thường: cùng một
+event được JetStream giao 4 lần. Kết quả phải là **1 email duy nhất**.
 
-```bash
-curl localhost:4000/v1/ping/received
-```
-
-`gui-khi-pong-chet` **vẫn xuất hiện**. NATS JetStream đã giữ tin lại và giao khi `pong-service` sống lại.
+Nó cũng chạy một bước đối chứng — event id khác, payload giống hệt → phải ra
+email thứ hai. Thiếu bước đối chứng thì "không tăng" có thể chỉ nghĩa là cả
+pipeline đang chết.
 
 ---
 
@@ -443,7 +446,7 @@ pnpm infra:logs       # xem log của hạ tầng
 
 # Code
 pnpm build            # dịch TypeScript -> JavaScript
-pnpm dev:ping         # chạy gateway + ping + pong
+pnpm dev:auth         # chạy gateway + identity + notification + web
 pnpm test             # chạy test tự động (không cần hạ tầng)
 pnpm typecheck        # kiểm tra lỗi kiểu dữ liệu
 pnpm smoke            # kiểm thử trên hệ thống đang chạy
@@ -452,14 +455,15 @@ pnpm format           # tự sửa format code
 
 ### Các địa chỉ web
 
-| Địa chỉ                | Là gì                                             |
-| ---------------------- | ------------------------------------------------- |
-| http://localhost:4000  | API chính (gateway)                               |
-| http://localhost:16686 | **Jaeger** — xem request đi qua những service nào |
-| http://localhost:8081  | **Mongo Express** — xem dữ liệu trong database    |
-| http://localhost:8222  | NATS — xem tin nhắn giữa các service              |
-| http://localhost:9001  | SeaweedFS — nơi sẽ lưu video                      |
-| http://localhost:8025  | Mailpit — email gửi đi sẽ hiện ở đây              |
+| Địa chỉ                | Là gì                                              |
+| ---------------------- | -------------------------------------------------- |
+| http://localhost:5173  | **Giao diện web** — đăng ký, đăng nhập, chọn hồ sơ |
+| http://localhost:4000  | API chính (gateway)                                |
+| http://localhost:16686 | **Jaeger** — xem request đi qua những service nào  |
+| http://localhost:8081  | **Mongo Express** — xem dữ liệu trong database     |
+| http://localhost:8222  | NATS — xem tin nhắn giữa các service               |
+| http://localhost:9001  | SeaweedFS — nơi sẽ lưu video                       |
+| http://localhost:8025  | **Mailpit** — mọi email hệ thống gửi đi            |
 
 ---
 
@@ -474,7 +478,7 @@ pnpm format           # tự sửa format code
 | `MongoServerError: Authentication failed`               | Đổi `SERVICE_DB_PASSWORD` sau khi đã tạo user | `pnpm infra:reset` rồi `pnpm infra:up`                    |
 | `Transaction numbers are only allowed on a replica set` | MongoDB không chạy ở chế độ replica set       | `pnpm infra:reset` rồi `pnpm infra:up`                    |
 | `EADDRINUSE :4000`                                      | Lần chạy trước chưa tắt hẳn                   | `netstat -ano \| findstr :4000` → `taskkill /PID <số> /F` |
-| `pnpm smoke` báo "không chạy được"                      | Service chưa chạy                             | Terminal khác phải đang chạy `pnpm dev:ping`              |
+| `pnpm smoke` báo "không chạy được"                      | Service chưa chạy                             | Terminal khác phải đang chạy `pnpm dev:auth`              |
 | Docker rất chậm                                         | Bình thường trên Windows lần đầu              | Tăng RAM trong Settings → Resources                       |
 
 ### Cách "làm lại từ đầu" khi bí
@@ -483,7 +487,7 @@ pnpm format           # tự sửa format code
 pnpm infra:reset      # xóa sạch dữ liệu Docker
 pnpm infra:up         # dựng lại
 pnpm build
-pnpm dev:ping
+pnpm dev:auth
 ```
 
 An toàn — hiện chưa có dữ liệu thật nào để mất.
@@ -494,8 +498,8 @@ An toàn — hiện chưa có dữ liệu thật nào để mất.
 
 Theo thứ tự này:
 
-1. **[PHASE-0.md](PHASE-0.md)** — tóm tắt những gì đã xây
-2. **[docs/15-code-walkthrough.md](docs/15-code-walkthrough.md)** — file nào làm gì, ai gọi ai
+1. **[docs/15-code-walkthrough.md](docs/15-code-walkthrough.md)** — file nào làm gì, ai gọi ai
+2. **[docs/05-authentication.md](docs/05-authentication.md)** — rotation, reuse detection, OAuth
 3. **[docs/00-overview.md](docs/00-overview.md)** — mục tiêu và phạm vi dự án
 4. **[docs/02-architecture.md](docs/02-architecture.md)** — kiến trúc tổng thể
 5. **[docs/14-inter-service-communication.md](docs/14-inter-service-communication.md)** — outbox, idempotency, saga (phần khó nhất và cũng giá trị nhất)
@@ -503,10 +507,10 @@ Theo thứ tự này:
 Muốn hiểu code thì đọc theo đường đi của một request:
 
 ```
-apps/gateway/src/ping/ping.controller.ts          ← điểm vào HTTP
-  → packages/service-kit/src/rpc/rpc-client.ts    ← gửi qua NATS
-    → apps/ping-service/src/echo/echo.controller.ts   ← nhận
-      → apps/ping-service/src/echo/echo.service.ts    ← nghiệp vụ + outbox
-        → packages/service-kit/src/outbox/outbox.relay.ts  ← gửi event
-          → apps/pong-service/src/received/echo.handlers.ts ← nhận event
+apps/gateway/src/auth/auth.controller.ts              ← điểm vào HTTP
+  → packages/service-kit/src/rpc/rpc-client.ts        ← gửi qua NATS
+    → apps/identity-service/src/api/auth.controller.ts      ← nhận
+      → apps/identity-service/src/application/auth.service.ts  ← nghiệp vụ + outbox
+        → packages/service-kit/src/outbox/outbox.relay.ts     ← gửi event
+          → apps/notification-service/src/events/identity.handlers.ts ← nhận event
 ```

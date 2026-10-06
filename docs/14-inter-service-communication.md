@@ -526,66 +526,126 @@ Giải pháp tốt hơn cho chính ví dụ trên: `catalog` **không** phát `t
 
 Với 9 service, chạy cả hệ thống lên để test là chậm và giòn. Thay bằng **contract test**: mỗi bên tự test với một bản mô tả hợp đồng chung.
 
+Phần này mô tả thứ **đã có trong repo**, không phải kế hoạch. Chạy bằng `pnpm test`.
+
 ### 8.1 Hợp đồng ở đâu
 
-`packages/contracts` giữ Zod schema cho **mọi** event và mọi NATS request/reply. Cả producer lẫn consumer đều import từ đó.
+`packages/contracts` giữ Zod schema cho **mọi** event (`EVENT_REGISTRY`) và mọi NATS request/reply (`RPC_REGISTRY`). Cả producer lẫn consumer đều import từ đó.
+
+Kèm theo schema là **fixture chuẩn** — `EVENT_FIXTURES` trong `src/fixtures.ts`:
 
 ```ts
-// packages/contracts/src/events/billing.ts
-export const subscriptionActivatedV1 = z.object({
-  userId: z.string(),
-  plan: z.enum(['basic', 'standard', 'premium']),
-  periodStart: z.string().datetime(),
-  periodEnd: z.string().datetime(),
-  maxStreams: z.number().int().positive(),
-  maxQuality: z.enum(['480p', '720p', '1080p']),
-});
-export type SubscriptionActivatedV1 = z.infer<typeof subscriptionActivatedV1>;
+export const EVENT_FIXTURES: { [T in EventType]: EventData<T> } = {
+  'identity.user.registered': {
+    userId: '65a1f0c3e4b0a1d2c3e4b0a1',
+    email: 'an.nguyen@example.com',
+    displayName: 'An Nguyễn',
+    verificationToken: 'xQ8vK3mZ9pL1nR5tY7wB2cF4hJ6kN0sD',
+    verificationExpiresAt: '2026-01-16T08:30:00.000Z',
+    registeredAt: '2026-01-15T08:30:00.000Z',
+  },
+  // ...
+};
 ```
+
+Fixture nằm trong `contracts` chứ không nằm trong thư mục test của từng service là có lý do: mỗi bên tự bịa fixture riêng thì hai bên trôi xa nhau dần mà test cả hai vẫn xanh — đúng cái bẫy mà contract test sinh ra để tránh.
+
+Kiểu của `EVENT_FIXTURES` được suy từ chính registry, nên **thêm field bắt buộc vào schema mà quên sửa fixture là lỗi compile**, không phải lỗi runtime.
 
 ### 8.2 Producer test
 
-```ts
-it('event phát ra khớp hợp đồng', async () => {
-  await billingService.activate({ userId, plan: 'standard' });
+`apps/identity-service/test/contract.spec.ts` — chạy luồng nghiệp vụ thật, rồi parse mọi event phát ra bằng chính schema mà consumer dùng:
 
-  const [outboxDoc] = await outbox.find({ type: 'billing.subscription.activated' });
-  expect(() => subscriptionActivatedV1.parse(outboxDoc.data)).not.toThrow();
-});
+```ts
+function assertContract(events: Published[], expectedTypes: string[]): void {
+  expect(events.map((e) => e.type).sort()).toEqual([...expectedTypes].sort());
+
+  for (const e of events) {
+    expect(isKnownEventType(e.type)).toBe(true);
+    expect(() => parseEventData(e.type as EventType, e.data)).not.toThrow();
+    assertSerialisable(e);
+  }
+}
 ```
+
+Hai chi tiết đáng chú ý:
+
+**`assertSerialisable`** — payload phải là JSON thuần. `Date`, `ObjectId`, `undefined` đi qua `JSON.stringify` sẽ biến dạng rồi mới tới consumer, trong khi Zod parse ở phía producer lại thấy nguyên bản nên không bắt được:
+
+```ts
+const roundTripped = JSON.parse(JSON.stringify(event.data));
+expect(roundTripped).toEqual(event.data);
+```
+
+Đây không phải lo xa. Thay `registeredAt: user.createdAt.toISOString()` bằng `user.createdAt` thì toàn bộ test nghiệp vụ của identity vẫn xanh — chỉ contract test đỏ.
+
+**Độ phủ** — mọi event trong registry phải được một luồng thật phát ra. Event đăng ký mà không ai phát là hợp đồng chết: không ai test, không ai dùng, nhưng người đọc vẫn tin là nó tồn tại.
 
 ### 8.3 Consumer test
 
+`apps/notification-service/test/contract.spec.ts` — identity-service KHÔNG chạy. Đầu vào là fixture đã qua `parseEventData`, đúng như `JetStreamConsumer` giao cho handler:
+
 ```ts
-it('xử lý được event đúng hợp đồng, không cần billing-service chạy', async () => {
-  const event = makeEnvelope(
-    'billing.subscription.activated',
-    subscriptionActivatedV1.parse(FIXTURE),
-  );
-
-  await identityHandler.handle(event);
-
-  const user = await Users.findById(FIXTURE.userId);
-  expect(user.subscription.plan).toBe('standard');
-});
+function envelopeFor<T extends EventType>(type: T, id: string) {
+  return {
+    id,
+    type,
+    version: EVENT_REGISTRY[type].version,
+    // ...
+    data: parseEventData(type, EVENT_FIXTURES[type]),
+  };
+}
 ```
 
-Hai bên không bao giờ chạy cùng nhau trong test, nhưng cả hai đều bị ràng buộc bởi cùng một schema. Đổi schema mà quên một bên → TypeScript báo lỗi lúc build.
+Bảng `HANDLED` liệt kê event nào do handler nào xử lý, **viết tay** thay vì tra ngược từ decorator `@OnEvent`. Tra ngược thì đổi tên event ở hai nơi cùng lúc vẫn xanh; viết tay thì không. Event chưa có handler phải được khai vào danh sách `IGNORED` — quên viết handler là test đỏ, thay vì event lặng lẽ không ai nhận.
+
+Hai bên không bao giờ chạy cùng nhau trong test, nhưng cả hai đều bị ràng buộc bởi cùng một schema và cùng một bộ fixture. Đổi schema mà quên một bên → TypeScript báo lỗi lúc build, hoặc một trong hai bộ test đỏ.
 
 ### 8.4 Kiểm tra tương thích ngược ở CI
 
-```ts
-// Snapshot schema đã publish, so với schema hiện tại
-it('schema không có thay đổi phá vỡ tương thích', () => {
-  const published = loadSnapshot('billing.subscription.activated.v1.json');
-  const current = zodToJsonSchema(subscriptionActivatedV1);
+`packages/contracts/test/snapshots/{events,rpc}.json` giữ **hình dạng hợp đồng đang chạy thật**. Mỗi lần sửa schema, `backward-compat.spec.ts` so hình dạng mới với snapshot.
 
-  // Thêm field optional: OK. Xóa field, đổi type, thêm required: FAIL
-  expect(checkBackwardCompatible(published, current)).toEqual({ compatible: true });
-});
+Không dùng `zod-to-json-schema`: JSON Schema mang theo nhiều chi tiết không liên quan tới tương thích (`$ref`, `title`, `description`), nên diff của nó ồn và dễ bị bỏ qua. `describeSchema()` chỉ giữ đúng thứ làm hỏng bên kia — tên field, kiểu, bắt buộc hay không, tập giá trị enum — và làm phẳng object lồng nhau thành đường dẫn có dấu chấm:
+
+```json
+{
+  "identity.user.registered.v1": {
+    "registeredAt": { "type": "string<datetime>", "optional": false, "nullable": false },
+    "verificationToken": { "type": "string", "optional": false, "nullable": false }
+  }
+}
 ```
 
-Đây là lưới an toàn quan trọng nhất. Thiếu nó, một dòng sửa schema có thể làm chết consumer ở service khác mà không ai biết cho tới lúc chạy thật.
+Phân loại thay đổi:
+
+| Thay đổi                  | Kết luận | Vì sao                                                       |
+| ------------------------- | -------- | ------------------------------------------------------------ |
+| Thêm field **tuỳ chọn**   | an toàn  | Consumer cũ bỏ qua, consumer mới đọc được                    |
+| Thêm field **bắt buộc**   | PHÁ VỠ   | Event cũ trong JetStream không có field này → replay là chết |
+| Xoá field                 | PHÁ VỠ   | Consumer cũ vẫn đang đọc nó                                  |
+| Đổi kiểu, siết ràng buộc  | PHÁ VỠ   | `string` → `string<datetime>` làm giá trị cũ bị từ chối      |
+| Tuỳ chọn → bắt buộc       | PHÁ VỠ   | Producer cũ không gửi field này                              |
+| Bắt buộc → tuỳ chọn       | RỦI RO   | Chết vào ngày producer thật sự bỏ gửi                        |
+| **Thêm** một giá trị enum | RỦI RO   | Zod từ chối giá trị lạ → consumer cũ ném lỗi, event vào DLQ  |
+| Bỏ một giá trị enum       | PHÁ VỠ   | Event cũ mang giá trị đó không parse được nữa                |
+
+Dòng "thêm giá trị enum" hay bị coi là vô hại. Nó không vô hại: `z.enum` không có nhánh mặc định, nên consumer chưa deploy gặp giá trị mới sẽ ném lỗi và event rơi vào DLQ sau 5 lần thử.
+
+Khi thay đổi là **có chủ ý** và đã xử lý cả hai bên:
+
+```bash
+UPDATE_CONTRACT_SNAPSHOT=1 pnpm --filter @nekoflix/contracts test
+```
+
+rồi commit snapshot cùng với thay đổi schema. **Diff của snapshot chính là thứ người review cần nhìn.**
+
+Bản thân `checkBackwardCompatible` cũng có test riêng (`schema-shape.spec.ts`). Nếu nó hỏng theo hướng "luôn nói compatible", mọi test tương thích ngược khác sẽ xanh mãi mãi trong khi không kiểm tra gì cả — lưới an toàn cũng cần được kiểm tra.
+
+### 8.5 Những gì contract test KHÔNG trả lời
+
+Nó không chứng minh event thật sự đi tới nơi. Outbox relay chết, consumer subscribe sai subject, JetStream chưa tạo stream — contract test vẫn xanh hết.
+
+Phần đó thuộc về `pnpm smoke` và `pnpm verify:idempotency`, chạy trên hạ tầng Docker thật.
 
 ---
 

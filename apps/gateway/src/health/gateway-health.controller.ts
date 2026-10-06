@@ -7,7 +7,7 @@ import { Public } from '../auth/jwt.guard';
  * Gateway không có database nên không dùng HealthController của service-kit.
  *
  * `ready` CỐ Ý không kiểm tra service phía sau. Nếu gateway báo not-ready vì
- * ping-service chết, orchestrator sẽ restart gateway — trong khi gateway
+ * identity-service chết, orchestrator sẽ restart gateway — trong khi gateway
  * hoàn toàn khỏe và vẫn phục vụ được các route khác.
  */
 // Health check và metrics PHẢI công khai: Docker healthcheck và Prometheus
