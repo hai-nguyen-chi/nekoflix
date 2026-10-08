@@ -66,16 +66,15 @@ sau khi xoá hoặc đổi tên một service mà quên chạy lại `pnpm insta
 chạy ở máy vẫn bình thường vì `node_modules` đã có sẵn, nhưng CI cài từ đầu thì đỏ
 ngay.
 
-### Ghi mã feature vào commit
+### Xong rồi thì đánh dấu
 
-Ít nhất một commit trong nhánh phải mang **mã feature** trong ngoặc:
+Sau khi PR merge vào `develop`, mở [11 — Roadmap](11-roadmap.md) và đổi cột **Xong**
+của feature đó từ ⬜ sang ✅. `pnpm progress` đọc chính cột đó.
 
-```
-feat(catalog): text index bỏ dấu tiếng Việt (2.5)
-```
+Đang làm dở thì để 🔄 — `pnpm progress` sẽ liệt kê riêng.
 
-`pnpm progress` đọc đúng chuỗi này để biết feature đã xong hay chưa — không có bảng
-trạng thái gõ tay ở đâu cả. Quên ghi thì feature vẫn hiện là chưa làm.
+Mã feature trong commit message (`feat(catalog): ... (2.5)`) vẫn nên ghi để dễ lần
+vết, nhưng nó **không** quyết định trạng thái.
 
 ### Nhánh sống lâu thì phải đồng bộ
 
