@@ -32,5 +32,12 @@ packages/*/src/**/*.d.ts
 packages/*/src/**/*.map
 !packages/config-eslint/index.js
 
+# Khai báo kiểu VIẾT TAY — phải loại trừ khỏi hai dòng *.d.ts ở trên.
+#
+# Thiếu dòng này, file nằm trên đĩa của người viết nhưng KHÔNG vào repo:
+# ở máy đó lint xanh, còn CI clone về thì `import.meta.env` thành `any` và
+# `no-unsafe-assignment` báo lỗi. Đúng kiểu lỗi "chỉ hỏng trên CI".
+!apps/web/src/vite-env.d.ts
+
 # Dump database — file nhị phân, phình nhanh, có thể chứa dữ liệu nhạy cảm
 .data/
