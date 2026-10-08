@@ -28,6 +28,7 @@ ADR không phải tài liệu thiết kế. Nó trả lời câu hỏi _"tại s
 | [012](012-database-per-service.md)      | Database per service, tách logic                                | Accepted             | 2026-10-05 |
 | [013](013-seaweedfs-replaces-minio.md)  | SeaweedFS thay MinIO (image MinIO không pull được)              | Accepted             | 2026-10-05 |
 | [014](014-atlas-for-deploy-not-dev.md)  | MongoDB Atlas cho deploy, Docker local cho dev (đính chính 008) | Accepted             | 2026-10-05 |
+| [015](015-three-branch-git-flow.md)     | Ba nhánh môi trường develop / staging / master                  | Accepted             | 2026-10-08 |
 
 ## Mẫu
 

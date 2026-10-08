@@ -1,15 +1,68 @@
 name: CI
 
+# Ba nhánh môi trường đều chạy CÙNG một bộ kiểm tra.
+#
+# Không nới lỏng cho develop. Một bộ nhẹ hơn ở tầng dưới nghĩa là lỗi chỉ
+# lộ ra lúc gộp lên staging — đúng lúc đang chuẩn bị phát hành và không ai
+# còn nhớ thay đổi nào gây ra nó.
 on:
   pull_request:
+    branches: [develop, staging, master]
   push:
-    branches: [main]
+    branches: [develop, staging, master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Không huỷ giữa chừng trên nhánh môi trường: lịch sử CI của develop /
+  # staging / master là bằng chứng "commit này đã xanh", cần đầy đủ.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Chặn merge nhảy cóc. Quy tắc này rất dễ quên lúc vội, và hậu quả chỉ
+  # lộ ra sau khi đã phát hành: master chứa thứ chưa bao giờ qua staging.
+  guard:
+    name: Hướng merge
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kiểm tra nhánh nguồn hợp lệ
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          case "$BASE" in
+            master)
+              # Chỉ staging (phát hành) hoặc hotfix (sửa khẩn) được vào master
+              case "$HEAD" in
+                staging|hotfix/*) ;;
+                *)
+                  echo "::error::'$HEAD' -> master bị chặn."
+                  echo "Chỉ 'staging' hoặc 'hotfix/*' được merge vào master."
+                  echo "Tính năng phải đi develop -> staging -> master."
+                  exit 1 ;;
+              esac ;;
+            staging)
+              # 'master' hợp lệ: sau hotfix phải merge ngược xuống, nếu không
+              # lần phát hành sau sẽ ghi đè bản vá và bug sống lại.
+              case "$HEAD" in
+                develop|master|hotfix/*|release/*) ;;
+                *)
+                  echo "::error::'$HEAD' -> staging bị chặn."
+                  echo "Chỉ 'develop', 'master' (back-merge), 'release/*' hoặc 'hotfix/*'."
+                  echo "Nhánh tính năng phải merge vào develop trước."
+                  exit 1 ;;
+              esac ;;
+            develop)
+              case "$HEAD" in
+                feat/*|fix/*|chore/*|docs/*|refactor/*|test/*|hotfix/*|master|staging) ;;
+                *)
+                  echo "::error::Tên nhánh '$HEAD' không theo quy ước."
+                  echo "Dùng: feat/ fix/ chore/ docs/ refactor/ test/"
+                  exit 1 ;;
+              esac ;;
+          esac
+          echo "$HEAD -> $BASE hợp lệ."
+
   check:
     name: Lint · Typecheck · Build · Test
     runs-on: ubuntu-latest

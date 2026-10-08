@@ -5,6 +5,7 @@ bước nào thì xác nhận bước đó, đừng chạy hết rồi mới đi
 
 - Chưa có Docker, chưa biết Docker là gì → [GETTING-STARTED.md](GETTING-STARTED.md)
 - Cần tra một lệnh cụ thể → [COMMANDS.md](COMMANDS.md)
+- Quy trình nhánh / PR / phát hành → [docs/17-git-workflow.md](docs/17-git-workflow.md)
 
 > **Địa chỉ web: http://localhost:5173**
 
@@ -33,6 +34,7 @@ Docker Desktop phải **đang mở** (chấm xanh "Engine running"), không ch�
 ```bash
 git clone https://github.com/hai-nguyen-chi/nekoflix.git
 cd nekoflix
+git checkout develop     # nhánh phát triển; master là bản đang phát hành
 pnpm install
 ```
 
@@ -268,15 +270,19 @@ Database **không** đi theo Git. Quy trình:
 
 ```bash
 # Máy A — trước khi rời
-git add -A && git commit -m "..." && git push
+git add -A && git commit -m "..."
+git push -u origin feat/<tên-nhánh>
 
 # Máy B
-git pull
+git fetch && git checkout feat/<tên-nhánh>
 pnpm install          # nếu package.json đổi
 pnpm build
 pnpm infra:up
 pnpm dev:auth
 ```
+
+Làm trên nhánh riêng cắt từ `develop`, không push thẳng vào nhánh môi trường —
+xem [docs/17-git-workflow.md](docs/17-git-workflow.md).
 
 Tài khoản đã tạo ở máy A **không có** ở máy B — đăng ký lại một tài khoản mới,
 mất 30 giây. Đó là chủ đích: dữ liệu dev là thứ vứt đi và tạo lại được.
