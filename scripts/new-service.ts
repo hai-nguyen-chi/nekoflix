@@ -10,6 +10,7 @@
  * là một cơ hội để cấu trúc lệch đi một chút. Sau vài service thì mỗi cái
  * một kiểu, và "khuôn chung" chỉ còn trên giấy.
  */
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -221,6 +222,27 @@ write(
 Xem docs/12-testing-strategy.md
 `,
 );
+
+/**
+ * Chạy Prettier lên thứ vừa sinh ra.
+ *
+ * `JSON.stringify(x, null, 2)` trải mảng ngắn ra nhiều dòng, còn Prettier
+ * (printWidth 100) gộp lại — nên file scaffold ra luôn trượt `format:check`
+ * và CI đỏ ngay ở feature đầu tiên của service mới. Đã dính một lần với
+ * catalog-service.
+ *
+ * `--ignore-unknown` vì thư mục có các file `.gitkeep`, Prettier không đoán
+ * được parser và sẽ thoát với lỗi thay vì bỏ qua.
+ */
+try {
+  execFileSync('npx', ['prettier', '--write', '--ignore-unknown', `apps/${serviceName}`], {
+    stdio: 'ignore',
+    shell: process.platform === 'win32',
+  });
+  console.log('\n  đã chạy Prettier lên file vừa tạo');
+} catch {
+  console.log('\n  CHƯA chạy được Prettier — nhớ gõ `pnpm format` trước khi commit');
+}
 
 console.log(`
 Đã tạo apps/${serviceName}

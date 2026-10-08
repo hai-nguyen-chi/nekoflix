@@ -1,0 +1,2 @@
+Gọi service khác. Mỗi client bọc sẵn timeout + circuit breaker + fallback.
+Domain gọi interface, không gọi NATS trực tiếp.
