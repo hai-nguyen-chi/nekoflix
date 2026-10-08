@@ -2,9 +2,10 @@
 
 Mở file này khi quên lệnh hoặc khi có gì đó hỏng.
 
-- Lần đầu cài máy mới → [GETTING-STARTED.md](GETTING-STARTED.md)
-- Phase 0 có gì → [PHASE-0.md](PHASE-0.md)
+- Setup & start từng bước → [RUN.md](RUN.md)
+- Lần đầu cài máy mới, chưa có Docker → [GETTING-STARTED.md](GETTING-STARTED.md)
 - Code chạy ra sao → [docs/15-code-walkthrough.md](docs/15-code-walkthrough.md)
+- Phase 0 có gì (tài liệu lịch sử) → [PHASE-0.md](PHASE-0.md)
 
 ---
 
@@ -34,7 +35,7 @@ Không tắt cũng không sao — Docker tự thu hồi RAM khi container rảnh
 
 Đây là quy trình cho trường hợp máy công ty + máy nhà.
 
-### Quy trình chuẩn — dùng seed, KHÔNG đồng bộ database
+### Quy trình chuẩn — KHÔNG đồng bộ database
 
 ```bash
 # ── Máy A, trước khi rời ──
@@ -43,18 +44,24 @@ git add -A && git commit -m "feat: ..." && git push
 # ── Máy B ──
 git pull
 pnpm install           # nếu package.json đổi
+pnpm build
 pnpm infra:up
-pnpm db:seed           # sinh lại dữ liệu mẫu — GIỐNG HỆT máy A
-pnpm build && pnpm dev:auth
+pnpm dev:auth
 ```
 
-**Đây là cách nên dùng.** Dữ liệu seed là _tất định_: cùng một lệnh cho cùng một kết quả trên mọi máy. Không cần copy file, không cần mạng, không bao giờ lệch phiên bản.
+Tài khoản đã tạo ở máy A **không có** ở máy B. Đăng ký lại một tài khoản mới qua
+giao diện web, mất 30 giây.
 
-> Nguyên tắc: **code đi theo Git, dữ liệu dev dựng lại bằng seed.** Đừng coi database dev là thứ phải nâng niu — nó là thứ vứt đi và tạo lại được.
+> Nguyên tắc: **code đi theo Git, dữ liệu dev tạo lại tại chỗ.** Đừng coi database dev là thứ phải nâng niu — nó là thứ vứt đi và tạo lại được.
+
+`pnpm db:seed` hiện **không tạo gì cả** (mảng seed đang trống). Luồng đăng ký phải
+phát event và gửi email xác thực, nên chèn thẳng tài khoản vào MongoDB sẽ cho ra
+tài khoản không giống tài khoản thật. Seed sẽ có ích từ Phase 2, khi cần hàng trăm
+bản ghi phim mà không ai muốn nhập tay.
 
 ### Khi có dữ liệu tạo tay cần mang theo
 
-Chỉ dùng khi bạn tạo dữ liệu bằng tay mà seed không sinh ra được.
+Dùng khi bạn đã tạo nhiều dữ liệu bằng tay và không muốn làm lại.
 
 ```bash
 # ── Máy A ──
@@ -72,13 +79,14 @@ pnpm db:list           # xem các bản đã có
 
 ### Những gì KHÔNG đi theo Git
 
-|                                  | Cách xử lý ở máy mới   |
-| -------------------------------- | ---------------------- |
-| `node_modules/`                  | `pnpm install`         |
-| `dist/`                          | `pnpm build`           |
-| **`.env`**                       | `cp .env.example .env` |
-| Dữ liệu MongoDB                  | `pnpm db:seed`         |
-| Dữ liệu Redis / NATS / SeaweedFS | tự sinh lại            |
+|                                  | Cách xử lý ở máy mới                            |
+| -------------------------------- | ----------------------------------------------- |
+| `node_modules/`                  | `pnpm install`                                  |
+| `dist/`                          | `pnpm build`                                    |
+| **`.env`**                       | `cp .env.example .env` **+ `pnpm gen:secrets`** |
+| **`apps/web/.env`**              | tuỳ chọn — mặc định đã đúng                     |
+| Dữ liệu MongoDB                  | đăng ký lại tài khoản                           |
+| Dữ liệu Redis / NATS / SeaweedFS | tự sinh lại                                     |
 
 ---
 
@@ -98,6 +106,7 @@ pnpm db:list           # xem các bản đã có
 | Lệnh                            | Làm gì                                         |
 | ------------------------------- | ---------------------------------------------- |
 | `pnpm install`                  | Cài thư viện                                   |
+| `pnpm gen:secrets`              | Sinh khoá RSA ký JWT vào `.env` (máy mới)      |
 | `pnpm build`                    | Dịch TypeScript → JavaScript                   |
 | `pnpm dev`                      | Chạy **tất cả** service                        |
 | `pnpm dev:auth`                 | gateway + identity + notification + web        |
@@ -108,13 +117,13 @@ pnpm db:list           # xem các bản đã có
 
 ### Database
 
-| Lệnh                      | Làm gì                           |
-| ------------------------- | -------------------------------- |
-| `pnpm db:seed`            | Sinh dữ liệu mẫu (thêm/cập nhật) |
-| `pnpm db:seed -- --reset` | Xoá dữ liệu cũ rồi seed lại      |
-| `pnpm db:export`          | Xuất ra `.data/`                 |
-| `pnpm db:import`          | Nhập bản mới nhất                |
-| `pnpm db:list`            | Liệt kê bản đã xuất              |
+| Lệnh                      | Làm gì                                       |
+| ------------------------- | -------------------------------------------- |
+| `pnpm db:seed`            | Sinh dữ liệu mẫu — **hiện chưa có seed nào** |
+| `pnpm db:seed -- --reset` | Xoá dữ liệu cũ rồi seed lại                  |
+| `pnpm db:export`          | Xuất ra `.data/`                             |
+| `pnpm db:import`          | Nhập bản mới nhất                            |
+| `pnpm db:list`            | Liệt kê bản đã xuất                          |
 
 ### Kiểm thử
 
@@ -194,8 +203,8 @@ pnpm build
 # 4. Cài lại thư viện
 rm -rf node_modules && pnpm install
 
-# 5. Làm lại từ đầu (XOÁ SẠCH dữ liệu — an toàn, seed lại được)
-pnpm infra:reset && pnpm infra:up && pnpm db:seed
+# 5. Làm lại từ đầu (XOÁ SẠCH dữ liệu — an toàn, đăng ký lại là xong)
+pnpm infra:reset && pnpm infra:up
 ```
 
 Bước 5 an toàn vì dữ liệu dev dựng lại được. Nếu có dữ liệu tay cần giữ, `pnpm db:export` trước.

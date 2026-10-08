@@ -16,8 +16,14 @@
  *
  * ──────────────────────────────────────────────────────────────────
  * THÊM SEED CHO SERVICE MỚI:
- *   1. Tạo scripts/seed/seeds/<tên>.seed.ts theo mẫu ping.seed.ts
+ *   1. Tạo scripts/seed/seeds/<tên>.seed.ts, implement interface `Seed`
+ *      trong ./types.ts
  *   2. Thêm vào mảng SEEDS bên dưới
+ *
+ * HIỆN TẠI MẢNG SEEDS ĐANG TRỐNG — `pnpm db:seed` chạy xong không tạo gì.
+ * Tài khoản dev được tạo bằng cách đăng ký qua giao diện web, vì luồng đăng
+ * ký còn phải phát event và gửi email xác thực; seed chèn thẳng vào MongoDB
+ * sẽ bỏ qua cả hai và cho ra tài khoản không giống tài khoản thật.
  * ──────────────────────────────────────────────────────────────────
  */
 import { MongoClient } from 'mongodb';

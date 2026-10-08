@@ -70,21 +70,26 @@ Mỗi service sở hữu database riêng, không ai đọc DB của ai. Ghi DB +
 
 ## Bắt đầu
 
-> **Mới vào dự án?** Đọc [GETTING-STARTED.md](GETTING-STARTED.md) — hướng dẫn từng bước từ số 0, kể cả cài Docker.
+> **Chỉ cần chạy cho được?** [RUN.md](RUN.md) — setup & start từng bước, có cách kiểm tra ở mỗi bước.
 >
-> **Đã cài xong, cần tra lệnh?** [COMMANDS.md](COMMANDS.md) — sổ tay lệnh + xử lý lỗi.
+> **Mới vào dự án, chưa có Docker?** [GETTING-STARTED.md](GETTING-STARTED.md) — từ số 0, kèm giải thích.
+>
+> **Cần tra một lệnh?** [COMMANDS.md](COMMANDS.md) — sổ tay lệnh + xử lý lỗi.
 
 Xem [docs/10-devops-setup.md](docs/10-devops-setup.md).
 
 ```bash
 pnpm install
 cp .env.example .env
-pnpm gen:secrets            # sinh khoá RSA ký JWT
+pnpm gen:secrets            # sinh khoá RSA ký JWT — thiếu bước này identity không start
 pnpm infra:up               # mongo, redis, nats, storage, jaeger, mailpit
-pnpm build && pnpm db:seed
+pnpm build
 
 pnpm dev:auth               # gateway + identity + notification + web
 ```
+
+Rồi mở **http://localhost:5173**. Backend mất khoảng 60 giây để compile xong —
+web lên trước nên đừng vội kết luận là hỏng.
 
 Cửa sổ thứ hai: `pnpm smoke` để kiểm chứng toàn bộ đường dây.
 

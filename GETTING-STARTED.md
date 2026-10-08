@@ -2,6 +2,8 @@
 
 Hướng dẫn cho người chưa quen Docker/microservices. Làm theo đúng thứ tự, mỗi bước đều có cách kiểm tra "đã đúng chưa".
 
+> Đã cài Docker rồi, chỉ cần checklist để chạy → [RUN.md](RUN.md).
+
 ---
 
 ## Phần 1 — Cần cài gì
@@ -224,9 +226,32 @@ VITE ready                               http://localhost:5173
 
 **Kiểm tra:** mở http://localhost:4000/health/ready — thấy `{"status":"ok",...}`.
 
+> **Web lên trước backend khoảng 1 phút.** Vite sẵn sàng sau ~5 giây, còn
+> gateway/identity/notification phải compile TypeScript xong mới chạy. Mở web
+> trong khoảng đó thì trang hiện ra nhưng đăng nhập báo lỗi mạng — **không phải
+> code hỏng**, chỉ là chờ chưa đủ. Chờ đến khi thấy đủ ba dòng "đã sẵn sàng".
+
 ---
 
-### Bước 6: Chạy kiểm thử
+### Bước 6: Mở web và dùng thử
+
+**http://localhost:5173**
+
+1. Trang tự chuyển sang màn hình đăng nhập → bấm **Đăng ký ngay**
+2. Điền email bất kỳ (vd `toi@nekoflix.local`), mật khẩu tối thiểu 8 ký tự **có
+   cả chữ và số** (vd `Matkhau123`), tên hiển thị tối thiểu 2 ký tự
+3. Mở http://localhost:8025 (Mailpit) — **email xác thực đã nằm ở đó**
+4. Bấm nút **Xác thực email** trong email
+5. Quay lại web → chọn hồ sơ → vào trang Browse
+
+Email không gửi ra Internet thật, Mailpit giữ lại tất cả — dùng địa chỉ gì cũng được.
+
+Bạn vừa đi qua toàn bộ đường dây: trình duyệt → gateway → NATS → identity →
+outbox → JetStream → notification → SMTP → Mailpit. Phần 4 giải thích từng chặng.
+
+---
+
+### Bước 7: Chạy kiểm thử
 
 Mở **terminal thứ hai** (giữ nguyên terminal đang chạy service), tại cùng thư mục:
 
@@ -272,7 +297,7 @@ Mất khoảng 30 giây — có một bước cố ý chờ hết grace period 1
 
 ---
 
-### Bước 7: Xem trace (việc cuối cùng)
+### Bước 8: Xem trace (việc cuối cùng)
 
 Smoke test không kiểm được phần này, phải nhìn bằng mắt.
 
