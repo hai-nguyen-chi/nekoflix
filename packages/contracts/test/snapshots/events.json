@@ -202,5 +202,237 @@
       "optional": false,
       "nullable": false
     }
+  },
+  "catalog.title.published.v1": {
+    "backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "genreIds": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "genreIds[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "publishedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.title.updated.v1": {
+    "backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "changedFields": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "changedFields[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "genreIds": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "genreIds[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "updatedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.title.unpublished.v1": {
+    "slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "unpublishedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.title.deleted.v1": {
+    "deletedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "episodeIds": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "episodeIds[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.episode.published.v1": {
+    "episodeId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "episodeNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "publishedAt": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": false
+    },
+    "seasonNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "titleName": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "titleSlug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
   }
 }

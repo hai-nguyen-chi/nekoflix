@@ -67,6 +67,57 @@ export const EVENT_FIXTURES: { [T in EventType]: EventData<T> } = {
     deletedAt: T0,
   },
 
+  'catalog.title.published': {
+    titleId: '65b2a1d4f5c6b7a8d9e0f1a2',
+    slug: 'bo-gia-2021',
+    type: 'movie',
+    title: 'Bố Già',
+    posterUrl: 'https://cdn.nekoflix.local/posters/bo-gia-2021.jpg',
+    backdropUrl: 'https://cdn.nekoflix.local/backdrops/bo-gia-2021.jpg',
+    maturityRating: 'PG-13',
+    year: 2021,
+    genreIds: ['65b2a1d4f5c6b7a8d9e0f101', '65b2a1d4f5c6b7a8d9e0f102'],
+    publishedAt: T0,
+  },
+
+  'catalog.title.updated': {
+    titleId: '65b2a1d4f5c6b7a8d9e0f1a2',
+    slug: 'bo-gia-2021',
+    type: 'movie',
+    title: 'Bố Già',
+    posterUrl: 'https://cdn.nekoflix.local/posters/bo-gia-2021-v2.jpg',
+    backdropUrl: 'https://cdn.nekoflix.local/backdrops/bo-gia-2021.jpg',
+    maturityRating: 'PG-13',
+    year: 2021,
+    genreIds: ['65b2a1d4f5c6b7a8d9e0f101', '65b2a1d4f5c6b7a8d9e0f102'],
+    changedFields: ['posterUrl'],
+    updatedAt: T0,
+  },
+
+  'catalog.title.unpublished': {
+    titleId: '65b2a1d4f5c6b7a8d9e0f1a2',
+    slug: 'bo-gia-2021',
+    unpublishedAt: T0,
+  },
+
+  'catalog.title.deleted': {
+    titleId: '65b2a1d4f5c6b7a8d9e0f1b3',
+    slug: 'gia-dinh-swat-2020',
+    episodeIds: ['65b2a1d4f5c6b7a8d9e0f201', '65b2a1d4f5c6b7a8d9e0f202'],
+    deletedAt: T0,
+  },
+
+  'catalog.episode.published': {
+    episodeId: '65b2a1d4f5c6b7a8d9e0f201',
+    titleId: '65b2a1d4f5c6b7a8d9e0f1b3',
+    titleName: 'Gia Đình SWAT',
+    titleSlug: 'gia-dinh-swat-2020',
+    seasonNumber: 1,
+    episodeNumber: 3,
+    name: 'Đêm dài nhất',
+    publishedAt: T0,
+  },
+
   'identity.password.reset_requested': {
     userId: '65a1f0c3e4b0a1d2c3e4b0a1',
     email: 'an.nguyen@example.com',

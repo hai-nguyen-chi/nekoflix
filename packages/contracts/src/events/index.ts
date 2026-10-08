@@ -8,8 +8,16 @@ import {
   userRegisteredV1,
   userVerifiedV1,
 } from './identity';
+import {
+  episodePublishedV1,
+  titleDeletedV1,
+  titlePublishedV1,
+  titleUnpublishedV1,
+  titleUpdatedV1,
+} from './catalog';
 
 export * from './identity';
+export * from './catalog';
 
 /**
  * Nguồn sự thật duy nhất cho mọi event trong hệ thống.
@@ -27,6 +35,12 @@ export const EVENT_REGISTRY = {
   'identity.profile.created': { version: 1, schema: profileCreatedV1 },
   'identity.profile.deleted': { version: 1, schema: profileDeletedV1 },
   'identity.password.reset_requested': { version: 1, schema: passwordResetRequestedV1 },
+
+  'catalog.title.published': { version: 1, schema: titlePublishedV1 },
+  'catalog.title.updated': { version: 1, schema: titleUpdatedV1 },
+  'catalog.title.unpublished': { version: 1, schema: titleUnpublishedV1 },
+  'catalog.title.deleted': { version: 1, schema: titleDeletedV1 },
+  'catalog.episode.published': { version: 1, schema: episodePublishedV1 },
 } as const;
 
 export type EventRegistry = typeof EVENT_REGISTRY;
