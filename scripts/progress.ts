@@ -11,9 +11,15 @@
  *   - ĐỊNH NGHĨA feature  -> docs/11-roadmap.md  (người viết)
  *   - TRẠNG THÁI feature  -> git                 (máy đọc)
  *
- * Quy ước để máy đọc được: commit message có mã feature trong ngoặc.
+ * Hai cách máy nhận biết một feature đã xong:
  *
- *     feat(catalog): text index bỏ dấu tiếng Việt (2.5)
+ *   1. Mã feature trong ngoặc ở commit message — dùng cho feature mới
+ *        feat(catalog): text index bỏ dấu tiếng Việt (2.5)
+ *
+ *   2. SHA commit ghi thẳng trong bảng — dùng cho Phase 0 và 1, vốn làm
+ *      xong TRƯỚC khi có quy ước mã. Không viết lại lịch sử đã publish chỉ
+ *      để nhét mã vào; chỉ ra đúng commit đã giao feature đó là đủ, và vẫn
+ *      do máy kiểm (SHA phải là tổ tiên của develop).
  *
  * Quên ghi mã thì feature hiện là chưa làm — đó là chủ đích, nó nhắc ngay
  * ở lần chạy kế tiếp chứ không để trôi.
@@ -28,15 +34,29 @@ const TRUNK = process.env.PROGRESS_BASE ?? 'develop';
 
 interface Feature {
   id: string;
-  branch: string;
+  /** Tên nhánh (feature chưa làm) hoặc SHA commit (feature đã giao) */
+  ref: string;
   kind: string;
   what: string;
 }
+
+/** `fc076c1` là SHA, `feat/catalog-seed` là tên nhánh */
+const isSha = (ref: string): boolean => /^[0-9a-f]{7,40}$/.test(ref);
 interface Phase {
   num: string;
   name: string;
   weeks: string;
   features: Feature[];
+}
+
+/** Chạy git, chỉ quan tâm thành công hay thất bại */
+function gitOk(...args: string[]): boolean {
+  try {
+    execFileSync('git', args, { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function git(...args: string[]): string {
@@ -66,7 +86,7 @@ function parseRoadmap(): Phase[] {
       line,
     );
     if (row && current) {
-      current.features.push({ id: row[1]!, branch: row[2]!, kind: row[3]!, what: row[4]! });
+      current.features.push({ id: row[1]!, ref: row[2]!, kind: row[3]!, what: row[4]! });
     }
   }
   return phases;
@@ -90,6 +110,16 @@ function openBranches(): Set<string> {
       .map((b) => b.trim().replace(/^origin\//, ''))
       .filter(Boolean),
   );
+}
+
+/**
+ * SHA thì kiểm commit có nằm trong lịch sử TRUNK không; nhánh thì tra mã
+ * feature trong commit message.
+ */
+function isDone(f: Feature, mergedFeatureIds: Set<string>): boolean {
+  return isSha(f.ref)
+    ? gitOk('merge-base', '--is-ancestor', f.ref, TRUNK)
+    : mergedFeatureIds.has(f.id);
 }
 
 // ── In ───────────────────────────────────────────────────────────
@@ -125,7 +155,7 @@ function main(): void {
   for (const p of phases) {
     if (p.features.length === 0) continue;
 
-    const d = p.features.filter((f) => done.has(f.id)).length;
+    const d = p.features.filter((f) => isDone(f, done)).length;
     totalDone += d;
     total += p.features.length;
 
@@ -137,13 +167,13 @@ function main(): void {
 
     for (const f of p.features) {
       let mark = '⬜';
-      if (done.has(f.id)) mark = '✅';
-      else if (branches.has(f.branch)) {
+      if (isDone(f, done)) mark = '✅';
+      else if (branches.has(f.ref)) {
         mark = '🔄';
         wip.push(f);
       } else if (!next) next = f;
 
-      console.log(`   ${mark} ${f.id.padEnd(4)} ${f.kind} ${f.branch.padEnd(34)} ${f.what}`);
+      console.log(`   ${mark} ${f.id.padEnd(4)} ${f.kind} ${f.ref.padEnd(34)} ${f.what}`);
     }
     console.log();
   }
@@ -162,13 +192,13 @@ function main(): void {
   if (next) {
     console.log('  Feature kế tiếp:');
     console.log(`    ${next.id}  ${next.what}`);
-    console.log(`    git checkout ${TRUNK} && git pull && git checkout -b ${next.branch}\n`);
+    console.log(`    git checkout ${TRUNK} && git pull && git checkout -b ${next.ref}\n`);
   } else if (totalDone === total && total > 0) {
     console.log('  Hết feature trong roadmap.\n');
   }
 
-  console.log('  Phase 0 và 1 đã xong trước khi có quy ước mã feature,');
-  console.log('  nên không nằm trong bảng trên. Xem docs/11-roadmap.md.\n');
+  console.log('  Phase 0 và 1 nhận biết bằng SHA commit, phase sau bằng mã feature');
+  console.log('  trong commit message. Danh sách đầy đủ: docs/11-roadmap.md\n');
 }
 
 main();

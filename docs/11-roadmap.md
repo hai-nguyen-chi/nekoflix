@@ -17,12 +17,12 @@ Trong mỗi phase, đơn vị công việc là **feature** — mỗi feature là
 
 ## Cách đọc bảng feature
 
-| Cột          | Nghĩa                                                             |
-| ------------ | ----------------------------------------------------------------- |
-| **#**        | Mã feature. Dùng trong commit message: `feat(catalog): ... (2.3)` |
-| **Nhánh**    | Tên nhánh cắt từ `develop` — xem [17 §1](17-git-workflow.md)      |
-| **Làm gì**   | Phạm vi. Ngoài phạm vi là PR khác                                 |
-| **Xong khi** | Điều kiện kiểm chứng được, không phải cảm tính                    |
+| Cột          | Nghĩa                                                                                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| **#**        | Mã feature. Dùng trong commit message: `feat(catalog): ... (2.3)`                                                                 |
+| **Nhánh**    | Tên nhánh cắt từ `develop` — xem [17 §1](17-git-workflow.md). Phase 0 và 1 ghi **SHA commit** vì làm xong trước khi có quy ước mã |
+| **Làm gì**   | Phạm vi. Ngoài phạm vi là PR khác                                                                                                 |
+| **Xong khi** | Điều kiện kiểm chứng được, không phải cảm tính                                                                                    |
 
 Xem feature nào xong, đang làm, hay chưa đụng tới:
 
@@ -55,19 +55,48 @@ diện thì demo được ngay. Cột **Loại** đánh dấu:
 
 ## ✅ Phase 0 — Nền móng phân tán (3 tuần) — XONG
 
-NATS JetStream, Transactional Outbox, idempotency, trace xuyên service, service-kit,
-database per service.
+Phase này làm xong **trước khi có quy ước mã feature**, nên cột thứ hai là **SHA
+commit** đã giao thay vì tên nhánh. `pnpm progress` kiểm SHA đó có nằm trong lịch
+sử `develop` không — vẫn do máy xác nhận, không phải tick tay.
 
-Giàn giáo `ping-service`/`pong-service` đã bị xoá khi identity và notification thay
-vào vai trò đó. Chi tiết: [PHASE-0.md](../PHASE-0.md).
+Chi tiết: [PHASE-0.md](../PHASE-0.md).
+
+| #   | Commit    | Loại | Làm gì                                                            |
+| --- | --------- | ---- | ----------------------------------------------------------------- |
+| 0.1 | `2ba6bee` | 🟦   | Monorepo pnpm + Turborepo, docker-compose 7 container             |
+| 0.2 | `2ba6bee` | 🟦   | `packages/contracts` — envelope, `EVENT_REGISTRY`, `RPC_REGISTRY` |
+| 0.3 | `2ba6bee` | 🟦   | `service-kit`: `createService()`, NATS, health, graceful shutdown |
+| 0.4 | `2ba6bee` | 🟦   | **Transactional Outbox** + relay — ghi DB và phát event nguyên tử |
+| 0.5 | `2ba6bee` | 🟦   | **Idempotency** + JetStream consumer + nak backoff + DLQ          |
+| 0.6 | `2ba6bee` | 🟦   | `RpcClient` typed + timeout + circuit breaker                     |
+| 0.7 | `2ba6bee` | 🟦   | OpenTelemetry + pino + prom-client, trace liền mạch qua NATS      |
+| 0.8 | `2ba6bee` | 🟦   | Rào chắn kiến trúc bằng ESLint — service không import service     |
+| 0.9 | `6a5196c` | 🟦   | `IndexGuard` — báo động khi tạo index thất bại thay vì nuốt lỗi   |
+| 0.A | `34a88eb` | 🟦   | MongoDB `--auth` + keyFile — ranh giới service được **ép thật**   |
+| 0.B | `6142627` | 🟦   | `db:export` / `db:import` — mang dữ liệu giữa hai máy             |
+| 0.C | `cf22e55` | 🟦   | Khung seed tất định                                               |
+
+> Giàn giáo `ping-service`/`pong-service` từng nằm ở phase này, đã bị xoá ở `6e30cb4`
+> khi identity và notification thay vào đúng vai trò đó.
 
 ---
 
 ## ✅ Phase 1 — Tài khoản (2.5 tuần) — XONG
 
-Đăng ký, đăng nhập, refresh rotation + phát hiện token bị đánh cắp, multi-profile,
-OAuth Google/GitHub, quên/đổi mật khẩu, email thật qua notification-service, giao
-diện auth. Tag `v0.1.0`.
+Tag `v0.1.0`.
+
+| #   | Commit    | Loại | Làm gì                                                                |
+| --- | --------- | ---- | --------------------------------------------------------------------- |
+| 1.1 | `fc076c1` | 🟩   | Đăng ký + argon2id + token xác thực email                             |
+| 1.2 | `fc076c1` | 🟩   | Đăng nhập + access token RS256 + refresh cookie httpOnly              |
+| 1.3 | `fc076c1` | 🟦   | **Refresh rotation + phát hiện token bị đánh cắp + grace period 10s** |
+| 1.4 | `0c6d44e` | 🟩   | Multi-profile — tối đa 5, PIN, kids mode                              |
+| 1.5 | `685611b` | 🟩   | OAuth Google + GitHub (Authorization Code + PKCE)                     |
+| 1.6 | `bfe6adf` | 🟩   | Quên / đặt lại / đổi mật khẩu                                         |
+| 1.7 | `938c159` | 🟩   | `notification-service` — email thật qua SMTP, email outbox riêng      |
+| 1.8 | `5e1fbc5` | 🟨   | Giao diện auth + `refreshOnce` single-flight                          |
+| 1.9 | `ebfb317` | 🟩   | Trang Tài khoản — đổi mật khẩu, đăng xuất mọi thiết bị                |
+| 1.A | `6e30cb4` | 🟦   | Contract test producer + consumer + snapshot tương thích ngược        |
 
 ---
 
@@ -226,8 +255,8 @@ Không có ước lượng — làm khi muốn học thêm.
 
 | Phase | Nội dung              | Feature | Tuần | Tích lũy |
 | ----- | --------------------- | ------- | ---- | -------- |
-| 0 ✅  | Nền móng phân tán     | —       | 3    | 3        |
-| 1 ✅  | Tài khoản             | —       | 2.5  | 5.5      |
+| 0 ✅  | Nền móng phân tán     | 12      | 3    | 3        |
+| 1 ✅  | Tài khoản             | 10      | 2.5  | 5.5      |
 | 2     | Duyệt phim            | 10      | 2.5  | 8        |
 | 3     | Xem được phim         | 13      | 3    | 11       |
 | 4     | Nhớ chỗ đang xem      | 8       | 1.5  | 12.5     |
@@ -235,7 +264,8 @@ Không có ước lượng — làm khi muốn học thêm.
 | 6     | Gói cước, gợi ý, saga | 10      | 3    | 18       |
 | 7     | Hoàn thiện & vận hành | 9       | 2.5  | **20.5** |
 
-**59 feature còn lại**, trung bình **~1.7 ngày/feature** ở nhịp 15h/tuần.
+**81 feature tổng cộng**, trong đó 22 đã xong (Phase 0 và 1) và **59 còn lại** —
+trung bình **~1.7 ngày/feature** ở nhịp 15h/tuần.
 
 Demo được cho người ngoài từ **cuối Phase 3** (tuần 11) — sớm hơn một tuần so với bản
 cũ, vì phần "nhớ chỗ đang xem" được tách ra khỏi khối media 4 tuần.
