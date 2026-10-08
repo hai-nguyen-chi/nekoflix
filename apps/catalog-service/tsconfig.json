@@ -1,0 +1,9 @@
+{
+  "extends": "@nekoflix/config-ts/nest.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node", "reflect-metadata"]
+  },
+  "include": ["src/**/*"]
+}
