@@ -24,6 +24,15 @@ Trong mỗi phase, đơn vị công việc là **feature** — mỗi feature là
 | **Làm gì**   | Phạm vi. Ngoài phạm vi là PR khác                                 |
 | **Xong khi** | Điều kiện kiểm chứng được, không phải cảm tính                    |
 
+Xem feature nào xong, đang làm, hay chưa đụng tới:
+
+```bash
+pnpm progress
+```
+
+Trạng thái **suy ra từ git**, không có cột gõ tay trong bảng dưới — bảng gõ tay sẽ
+lệch với thực tế đúng vào lúc bận nhất.
+
 ### Ba quy tắc
 
 **1. Một feature ≤ 3 ngày.** Quá 3 ngày thì nhánh sống lâu, lệch xa `develop`, và PR

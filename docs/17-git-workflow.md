@@ -36,6 +36,9 @@ git pull
 git checkout -b feat/catalog-service
 ```
 
+Tên nhánh lấy từ bảng feature trong [11 — Roadmap](11-roadmap.md); `pnpm progress`
+in sẵn lệnh `git checkout -b` cho feature kế tiếp.
+
 Tiền tố quyết định nhánh được merge vào đâu — CI chặn nếu sai:
 
 | Tiền tố     | Dùng khi            |
@@ -62,6 +65,17 @@ thường ngày KHÔNG kiểm: nó bắt lỗi `pnpm-lock.yaml` lệch so với 
 sau khi xoá hoặc đổi tên một service mà quên chạy lại `pnpm install`. Lệch kiểu đó
 chạy ở máy vẫn bình thường vì `node_modules` đã có sẵn, nhưng CI cài từ đầu thì đỏ
 ngay.
+
+### Ghi mã feature vào commit
+
+Ít nhất một commit trong nhánh phải mang **mã feature** trong ngoặc:
+
+```
+feat(catalog): text index bỏ dấu tiếng Việt (2.5)
+```
+
+`pnpm progress` đọc đúng chuỗi này để biết feature đã xong hay chưa — không có bảng
+trạng thái gõ tay ở đâu cả. Quên ghi thì feature vẫn hiện là chưa làm.
 
 ### Nhánh sống lâu thì phải đồng bộ
 
