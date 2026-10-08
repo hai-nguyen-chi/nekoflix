@@ -19,19 +19,20 @@ Trong mỗi phase, đơn vị công việc là **feature** — mỗi feature là
 
 | Cột          | Nghĩa                                                                                                                             |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| **#**        | Mã feature. Dùng trong commit message: `feat(catalog): ... (2.3)`                                                                 |
+| **Xong**     | ✅ xong · 🔄 đang làm · ⬜ chưa đụng tới                                                                                          |
+| **#**        | Mã feature. Nên ghi trong commit message để dễ lần vết: `feat(catalog): ... (2.3)`                                                |
 | **Nhánh**    | Tên nhánh cắt từ `develop` — xem [17 §1](17-git-workflow.md). Phase 0 và 1 ghi **SHA commit** vì làm xong trước khi có quy ước mã |
 | **Làm gì**   | Phạm vi. Ngoài phạm vi là PR khác                                                                                                 |
 | **Xong khi** | Điều kiện kiểm chứng được, không phải cảm tính                                                                                    |
 
-Xem feature nào xong, đang làm, hay chưa đụng tới:
+Merge xong một feature thì **tự đổi dấu ở cột Xong**. Đang làm dở để 🔄.
 
 ```bash
 pnpm progress
 ```
 
-Trạng thái **suy ra từ git**, không có cột gõ tay trong bảng dưới — bảng gõ tay sẽ
-lệch với thực tế đúng vào lúc bận nhất.
+đọc đúng cột đó, in thanh tiến độ mỗi phase và lệnh `git checkout -b` cho feature kế
+tiếp. Nó chỉ tổng hợp — không tự đoán trạng thái từ git.
 
 ### Ba quy tắc
 
@@ -55,26 +56,25 @@ diện thì demo được ngay. Cột **Loại** đánh dấu:
 
 ## ✅ Phase 0 — Nền móng phân tán (3 tuần) — XONG
 
-Phase này làm xong **trước khi có quy ước mã feature**, nên cột thứ hai là **SHA
-commit** đã giao thay vì tên nhánh. `pnpm progress` kiểm SHA đó có nằm trong lịch
-sử `develop` không — vẫn do máy xác nhận, không phải tick tay.
+Phase này làm xong trước khi có bảng feature, nên cột thứ hai ghi **SHA commit** đã
+giao thay vì tên nhánh — tra ngược được bằng `git show <sha>`.
 
 Chi tiết: [PHASE-0.md](../PHASE-0.md).
 
-| #   | Commit    | Loại | Làm gì                                                            |
-| --- | --------- | ---- | ----------------------------------------------------------------- |
-| 0.1 | `2ba6bee` | 🟦   | Monorepo pnpm + Turborepo, docker-compose 7 container             |
-| 0.2 | `2ba6bee` | 🟦   | `packages/contracts` — envelope, `EVENT_REGISTRY`, `RPC_REGISTRY` |
-| 0.3 | `2ba6bee` | 🟦   | `service-kit`: `createService()`, NATS, health, graceful shutdown |
-| 0.4 | `2ba6bee` | 🟦   | **Transactional Outbox** + relay — ghi DB và phát event nguyên tử |
-| 0.5 | `2ba6bee` | 🟦   | **Idempotency** + JetStream consumer + nak backoff + DLQ          |
-| 0.6 | `2ba6bee` | 🟦   | `RpcClient` typed + timeout + circuit breaker                     |
-| 0.7 | `2ba6bee` | 🟦   | OpenTelemetry + pino + prom-client, trace liền mạch qua NATS      |
-| 0.8 | `2ba6bee` | 🟦   | Rào chắn kiến trúc bằng ESLint — service không import service     |
-| 0.9 | `6a5196c` | 🟦   | `IndexGuard` — báo động khi tạo index thất bại thay vì nuốt lỗi   |
-| 0.A | `34a88eb` | 🟦   | MongoDB `--auth` + keyFile — ranh giới service được **ép thật**   |
-| 0.B | `6142627` | 🟦   | `db:export` / `db:import` — mang dữ liệu giữa hai máy             |
-| 0.C | `cf22e55` | 🟦   | Khung seed tất định                                               |
+| Xong | #   | Commit    | Loại | Làm gì                                                            |
+| ---- | --- | --------- | ---- | ----------------------------------------------------------------- |
+| ✅   | 0.1 | `2ba6bee` | 🟦   | Monorepo pnpm + Turborepo, docker-compose 7 container             |
+| ✅   | 0.2 | `2ba6bee` | 🟦   | `packages/contracts` — envelope, `EVENT_REGISTRY`, `RPC_REGISTRY` |
+| ✅   | 0.3 | `2ba6bee` | 🟦   | `service-kit`: `createService()`, NATS, health, graceful shutdown |
+| ✅   | 0.4 | `2ba6bee` | 🟦   | **Transactional Outbox** + relay — ghi DB và phát event nguyên tử |
+| ✅   | 0.5 | `2ba6bee` | 🟦   | **Idempotency** + JetStream consumer + nak backoff + DLQ          |
+| ✅   | 0.6 | `2ba6bee` | 🟦   | `RpcClient` typed + timeout + circuit breaker                     |
+| ✅   | 0.7 | `2ba6bee` | 🟦   | OpenTelemetry + pino + prom-client, trace liền mạch qua NATS      |
+| ✅   | 0.8 | `2ba6bee` | 🟦   | Rào chắn kiến trúc bằng ESLint — service không import service     |
+| ✅   | 0.9 | `6a5196c` | 🟦   | `IndexGuard` — báo động khi tạo index thất bại thay vì nuốt lỗi   |
+| ✅   | 0.A | `34a88eb` | 🟦   | MongoDB `--auth` + keyFile — ranh giới service được **ép thật**   |
+| ✅   | 0.B | `6142627` | 🟦   | `db:export` / `db:import` — mang dữ liệu giữa hai máy             |
+| ✅   | 0.C | `cf22e55` | 🟦   | Khung seed tất định                                               |
 
 > Giàn giáo `ping-service`/`pong-service` từng nằm ở phase này, đã bị xoá ở `6e30cb4`
 > khi identity và notification thay vào đúng vai trò đó.
@@ -85,18 +85,18 @@ Chi tiết: [PHASE-0.md](../PHASE-0.md).
 
 Tag `v0.1.0`.
 
-| #   | Commit    | Loại | Làm gì                                                                |
-| --- | --------- | ---- | --------------------------------------------------------------------- |
-| 1.1 | `fc076c1` | 🟩   | Đăng ký + argon2id + token xác thực email                             |
-| 1.2 | `fc076c1` | 🟩   | Đăng nhập + access token RS256 + refresh cookie httpOnly              |
-| 1.3 | `fc076c1` | 🟦   | **Refresh rotation + phát hiện token bị đánh cắp + grace period 10s** |
-| 1.4 | `0c6d44e` | 🟩   | Multi-profile — tối đa 5, PIN, kids mode                              |
-| 1.5 | `685611b` | 🟩   | OAuth Google + GitHub (Authorization Code + PKCE)                     |
-| 1.6 | `bfe6adf` | 🟩   | Quên / đặt lại / đổi mật khẩu                                         |
-| 1.7 | `938c159` | 🟩   | `notification-service` — email thật qua SMTP, email outbox riêng      |
-| 1.8 | `5e1fbc5` | 🟨   | Giao diện auth + `refreshOnce` single-flight                          |
-| 1.9 | `ebfb317` | 🟩   | Trang Tài khoản — đổi mật khẩu, đăng xuất mọi thiết bị                |
-| 1.A | `6e30cb4` | 🟦   | Contract test producer + consumer + snapshot tương thích ngược        |
+| Xong | #   | Commit    | Loại | Làm gì                                                                |
+| ---- | --- | --------- | ---- | --------------------------------------------------------------------- |
+| ✅   | 1.1 | `fc076c1` | 🟩   | Đăng ký + argon2id + token xác thực email                             |
+| ✅   | 1.2 | `fc076c1` | 🟩   | Đăng nhập + access token RS256 + refresh cookie httpOnly              |
+| ✅   | 1.3 | `fc076c1` | 🟦   | **Refresh rotation + phát hiện token bị đánh cắp + grace period 10s** |
+| ✅   | 1.4 | `0c6d44e` | 🟩   | Multi-profile — tối đa 5, PIN, kids mode                              |
+| ✅   | 1.5 | `685611b` | 🟩   | OAuth Google + GitHub (Authorization Code + PKCE)                     |
+| ✅   | 1.6 | `bfe6adf` | 🟩   | Quên / đặt lại / đổi mật khẩu                                         |
+| ✅   | 1.7 | `938c159` | 🟩   | `notification-service` — email thật qua SMTP, email outbox riêng      |
+| ✅   | 1.8 | `5e1fbc5` | 🟨   | Giao diện auth + `refreshOnce` single-flight                          |
+| ✅   | 1.9 | `ebfb317` | 🟩   | Trang Tài khoản — đổi mật khẩu, đăng xuất mọi thiết bị                |
+| ✅   | 1.A | `6e30cb4` | 🟦   | Contract test producer + consumer + snapshot tương thích ngược        |
 
 ---
 
@@ -107,18 +107,18 @@ Tag `v0.1.0`.
 **Lần đầu**: gateway phải **ghép dữ liệu từ nhiều nguồn** và chịu được khi một nguồn
 chết.
 
-| #   | Nhánh                           | Loại | Làm gì                                                                        | Xong khi                                                   |
-| --- | ------------------------------- | ---- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| 2.1 | `feat/catalog-skeleton`         | 🟦   | `pnpm new:service catalog 4002`, schema `titles` `genres` `episodes` `people` | `/health/ready` trả 200, `pnpm ci:local` xanh              |
-| 2.2 | `feat/catalog-contracts`        | 🟦   | RPC + event schema trong `packages/contracts`, kèm `EVENT_FIXTURES`           | contract test xanh, snapshot commit **trong cùng PR**      |
-| 2.3 | `feat/catalog-read-api`         | 🟦   | `list`, `detail`, `byIds` (batch), `episodes`                                 | gọi qua NATS trả đúng dữ liệu                              |
-| 2.4 | `feat/catalog-seed`             | 🟦   | `scripts/seed/seeds/catalog.seed.ts` — 20 title + episodes                    | `pnpm db:seed` ra kết quả **tất định** trên mọi máy        |
-| 2.5 | `feat/catalog-search`           | 🟦   | Text index + bỏ dấu tiếng Việt                                                | tìm `bo gia` ra `Bố Già`                                   |
-| 2.6 | `feat/catalog-cache`            | 🟦   | Cache Redis + invalidate qua event `catalog.title.updated`                    | sửa title → lần gọi kế tiếp thấy ngay, không chờ TTL       |
-| 2.7 | `feat/gateway-home-composition` | 🟩   | `/v1/catalog/home` ghép nhiều nguồn + circuit breaker + fallback              | **tắt catalog → gateway trả 503 có thông báo, không treo** |
-| 2.8 | `feat/web-browse`               | 🟩   | Trang Browse (rows) + TitleDetail                                             | `/browse` hiện đủ row, click ra trang chi tiết             |
-| 2.9 | `feat/web-search`               | 🟨   | Ô tìm kiếm + trang kết quả + trạng thái rỗng                                  | gõ không dấu vẫn ra kết quả                                |
-| 2.A | `feat/catalog-admin`            | 🟩   | Admin CRUD + import TMDB                                                      | thêm title ở admin → FE thấy sau khi cache bị invalidate   |
+| Xong | #   | Nhánh                           | Loại | Làm gì                                                                        | Xong khi                                                   |
+| ---- | --- | ------------------------------- | ---- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| ✅   | 2.1 | `feat/catalog-skeleton`         | 🟦   | `pnpm new:service catalog 4002`, schema `titles` `genres` `episodes` `people` | `/health/ready` trả 200, `pnpm ci:local` xanh              |
+| ✅   | 2.2 | `feat/catalog-contracts`        | 🟦   | RPC + event schema trong `packages/contracts`, kèm `EVENT_FIXTURES`           | contract test xanh, snapshot commit **trong cùng PR**      |
+| ⬜   | 2.3 | `feat/catalog-read-api`         | 🟦   | `list`, `detail`, `byIds` (batch), `episodes`                                 | gọi qua NATS trả đúng dữ liệu                              |
+| ⬜   | 2.4 | `feat/catalog-seed`             | 🟦   | `scripts/seed/seeds/catalog.seed.ts` — 20 title + episodes                    | `pnpm db:seed` ra kết quả **tất định** trên mọi máy        |
+| ⬜   | 2.5 | `feat/catalog-search`           | 🟦   | Text index + bỏ dấu tiếng Việt                                                | tìm `bo gia` ra `Bố Già`                                   |
+| ⬜   | 2.6 | `feat/catalog-cache`            | 🟦   | Cache Redis + invalidate qua event `catalog.title.updated`                    | sửa title → lần gọi kế tiếp thấy ngay, không chờ TTL       |
+| ⬜   | 2.7 | `feat/gateway-home-composition` | 🟩   | `/v1/catalog/home` ghép nhiều nguồn + circuit breaker + fallback              | **tắt catalog → gateway trả 503 có thông báo, không treo** |
+| ⬜   | 2.8 | `feat/web-browse`               | 🟩   | Trang Browse (rows) + TitleDetail                                             | `/browse` hiện đủ row, click ra trang chi tiết             |
+| ⬜   | 2.9 | `feat/web-search`               | 🟨   | Ô tìm kiếm + trang kết quả + trạng thái rỗng                                  | gõ không dấu vẫn ra kết quả                                |
+| ⬜   | 2.A | `feat/catalog-admin`            | 🟩   | Admin CRUD + import TMDB                                                      | thêm title ở admin → FE thấy sau khi cache bị invalidate   |
 
 > **2.2 trước 2.3** là có chủ đích: viết hợp đồng trước, cài sau. Làm ngược lại thì
 > schema bị uốn theo cách cài đặt tình cờ.
@@ -133,21 +133,21 @@ thông thì tự xuống 480p.
 **Lần đầu**: có **sync call giữa service** (media hỏi identity về gói cước) và phải
 sống được khi bên kia chết.
 
-| #   | Nhánh                          | Loại | Làm gì                                                                | Xong khi                                                     |
-| --- | ------------------------------ | ---- | --------------------------------------------------------------------- | ------------------------------------------------------------ |
-| 3.1 | `feat/media-skeleton`          | 🟦   | Service + schema `assets` `mediaKeys`                                 | `/health/ready` 200                                          |
-| 3.2 | `feat/media-upload`            | 🟦   | Presigned multipart lên SeaweedFS, resume được                        | ngắt mạng giữa chừng → nối lại, không phải upload từ đầu     |
-| 3.3 | `feat/media-validate`          | 🟦   | `ffprobe` + magic bytes                                               | đổi đuôi `.exe` thành `.mp4` → bị từ chối                    |
-| 3.4 | `feat/transcode-worker`        | 🟦   | BullMQ job + FFmpeg HLS **một rendition**, retry, idempotent, SIGTERM | upload → ra 1 playlist phát được bằng `ffplay`               |
-| 3.5 | `feat/transcode-abr`           | 🟦   | Multi-bitrate, keyframe thẳng hàng giữa các rendition                 | chuyển rendition không giật, không nhảy hình                 |
-| 3.6 | `feat/media-encryption`        | 🟦   | AES-128 + endpoint trả key có authz                                   | lấy key không kèm token hợp lệ → 403                         |
-| 3.7 | `feat/media-artifacts`         | 🟦   | Sprite seek preview, poster, phụ đề                                   | file sprite sinh ra đúng số khung                            |
-| 3.8 | `feat/media-playback-token`    | 🟦   | Playback token + master playlist động theo `maxQuality`               | tài khoản gói thấp không thấy rendition 1080p trong playlist |
-| 3.9 | `feat/media-subscription-sync` | 🟦   | Sync call `identity.user.subscription` + cache Redis 60s + fallback   | **tắt identity → đang xem vẫn xem tiếp được**                |
-| 3.A | `feat/web-player-core`         | 🟩   | hls.js + play/pause/seek/volume/fullscreen                            | phát được phim đã transcode                                  |
-| 3.B | `feat/web-player-tracks`       | 🟨   | Chọn phụ đề, chọn chất lượng, PiP, phím tắt                           | bật phụ đề tiếng Việt hiển thị đúng                          |
-| 3.C | `feat/web-player-preview`      | 🟨   | Seek preview dùng sprite ở 3.7                                        | rê chuột trên thanh seek thấy thumbnail                      |
-| 3.D | `feat/web-admin-upload`        | 🟩   | Giao diện upload + theo dõi tiến độ transcode                         | upload từ trình duyệt tới lúc phát được, không cần `curl`    |
+| Xong | #   | Nhánh                          | Loại | Làm gì                                                                | Xong khi                                                     |
+| ---- | --- | ------------------------------ | ---- | --------------------------------------------------------------------- | ------------------------------------------------------------ |
+| ⬜   | 3.1 | `feat/media-skeleton`          | 🟦   | Service + schema `assets` `mediaKeys`                                 | `/health/ready` 200                                          |
+| ⬜   | 3.2 | `feat/media-upload`            | 🟦   | Presigned multipart lên SeaweedFS, resume được                        | ngắt mạng giữa chừng → nối lại, không phải upload từ đầu     |
+| ⬜   | 3.3 | `feat/media-validate`          | 🟦   | `ffprobe` + magic bytes                                               | đổi đuôi `.exe` thành `.mp4` → bị từ chối                    |
+| ⬜   | 3.4 | `feat/transcode-worker`        | 🟦   | BullMQ job + FFmpeg HLS **một rendition**, retry, idempotent, SIGTERM | upload → ra 1 playlist phát được bằng `ffplay`               |
+| ⬜   | 3.5 | `feat/transcode-abr`           | 🟦   | Multi-bitrate, keyframe thẳng hàng giữa các rendition                 | chuyển rendition không giật, không nhảy hình                 |
+| ⬜   | 3.6 | `feat/media-encryption`        | 🟦   | AES-128 + endpoint trả key có authz                                   | lấy key không kèm token hợp lệ → 403                         |
+| ⬜   | 3.7 | `feat/media-artifacts`         | 🟦   | Sprite seek preview, poster, phụ đề                                   | file sprite sinh ra đúng số khung                            |
+| ⬜   | 3.8 | `feat/media-playback-token`    | 🟦   | Playback token + master playlist động theo `maxQuality`               | tài khoản gói thấp không thấy rendition 1080p trong playlist |
+| ⬜   | 3.9 | `feat/media-subscription-sync` | 🟦   | Sync call `identity.user.subscription` + cache Redis 60s + fallback   | **tắt identity → đang xem vẫn xem tiếp được**                |
+| ⬜   | 3.A | `feat/web-player-core`         | 🟩   | hls.js + play/pause/seek/volume/fullscreen                            | phát được phim đã transcode                                  |
+| ⬜   | 3.B | `feat/web-player-tracks`       | 🟨   | Chọn phụ đề, chọn chất lượng, PiP, phím tắt                           | bật phụ đề tiếng Việt hiển thị đúng                          |
+| ⬜   | 3.C | `feat/web-player-preview`      | 🟨   | Seek preview dùng sprite ở 3.7                                        | rê chuột trên thanh seek thấy thumbnail                      |
+| ⬜   | 3.D | `feat/web-admin-upload`        | 🟩   | Giao diện upload + theo dõi tiến độ transcode                         | upload từ trình duyệt tới lúc phát được, không cần `curl`    |
 
 > **3.4 → 3.5 → 3.6 tách rời** vì đây là chỗ hay sa lầy nhất. Phát được **một**
 > rendition trước đã; ABR và mã hoá là hai bài toán khác nhau, gộp vào một nhánh thì
@@ -162,16 +162,16 @@ sống được khi bên kia chết.
 **Lần đầu**: có **read model** — activity giữ bản sao dữ liệu catalog để không phụ
 thuộc catalog lúc đọc.
 
-| #   | Nhánh                        | Loại | Làm gì                                                                | Xong khi                                                 |
-| --- | ---------------------------- | ---- | --------------------------------------------------------------------- | -------------------------------------------------------- |
-| 4.1 | `feat/activity-skeleton`     | 🟦   | Service + schema `progress` `watchHistory` `watchlist` `ratings`      | `/health/ready` 200                                      |
-| 4.2 | `feat/activity-progress`     | 🟩   | Upsert tiến độ, Continue Watching, event `progress.updated` (gộp 60s) | xem dở → máy khác mở lên đúng giây đó                    |
-| 4.3 | `feat/web-progress-sync`     | 🟨   | `useProgressSync` + `sendBeacon` lúc đóng tab                         | đóng tab đột ngột vẫn lưu được vị trí                    |
-| 4.4 | `feat/activity-watchlist`    | 🟩   | Watchlist + ratings                                                   | thêm vào danh sách, hiện ở trang chủ                     |
-| 4.5 | `feat/activity-projections`  | 🟦   | Read model `titleProjections`, consume `catalog.title.*`              | **tắt catalog → watchlist vẫn hiện tên phim**            |
-| 4.6 | `feat/activity-reconcile`    | 🟦   | Job đối soát projection với catalog                                   | sửa lệch thủ công → job chạy → tự khớp lại               |
-| 4.7 | `feat/activity-stream-limit` | 🟦   | Giới hạn số luồng đồng thời (Redis sorted set + heartbeat)            | mở quá số luồng cho phép → luồng mới bị từ chối có lý do |
-| 4.8 | `feat/web-player-next`       | 🟨   | Skip Intro, Next Episode                                              | hết tập tự gợi ý tập sau                                 |
+| Xong | #   | Nhánh                        | Loại | Làm gì                                                                | Xong khi                                                 |
+| ---- | --- | ---------------------------- | ---- | --------------------------------------------------------------------- | -------------------------------------------------------- |
+| ⬜   | 4.1 | `feat/activity-skeleton`     | 🟦   | Service + schema `progress` `watchHistory` `watchlist` `ratings`      | `/health/ready` 200                                      |
+| ⬜   | 4.2 | `feat/activity-progress`     | 🟩   | Upsert tiến độ, Continue Watching, event `progress.updated` (gộp 60s) | xem dở → máy khác mở lên đúng giây đó                    |
+| ⬜   | 4.3 | `feat/web-progress-sync`     | 🟨   | `useProgressSync` + `sendBeacon` lúc đóng tab                         | đóng tab đột ngột vẫn lưu được vị trí                    |
+| ⬜   | 4.4 | `feat/activity-watchlist`    | 🟩   | Watchlist + ratings                                                   | thêm vào danh sách, hiện ở trang chủ                     |
+| ⬜   | 4.5 | `feat/activity-projections`  | 🟦   | Read model `titleProjections`, consume `catalog.title.*`              | **tắt catalog → watchlist vẫn hiện tên phim**            |
+| ⬜   | 4.6 | `feat/activity-reconcile`    | 🟦   | Job đối soát projection với catalog                                   | sửa lệch thủ công → job chạy → tự khớp lại               |
+| ⬜   | 4.7 | `feat/activity-stream-limit` | 🟦   | Giới hạn số luồng đồng thời (Redis sorted set + heartbeat)            | mở quá số luồng cho phép → luồng mới bị từ chối có lý do |
+| ⬜   | 4.8 | `feat/web-player-next`       | 🟨   | Skip Intro, Next Episode                                              | hết tập tự gợi ý tập sau                                 |
 
 ---
 
@@ -179,17 +179,17 @@ thuộc catalog lúc đọc.
 
 **Mốc**: hai người ở hai máy xem cùng một phim, một người tua thì người kia tua theo.
 
-| #   | Nhánh                              | Loại | Làm gì                                               | Xong khi                                                    |
-| --- | ---------------------------------- | ---- | ---------------------------------------------------- | ----------------------------------------------------------- |
-| 5.1 | `feat/realtime-skeleton`           | 🟦   | Socket.IO gateway + auth handshake + `auth:refresh`  | kết nối được kèm token, token hết hạn thì refresh tại chỗ   |
-| 5.2 | `feat/realtime-redis-adapter`      | 🟦   | Redis adapter                                        | **chạy 2 instance, client ở hai bên vẫn nhận tin của nhau** |
-| 5.3 | `feat/watch-party-room`            | 🟩   | Tạo/vào phòng, vai trò host                          | hai tab vào cùng phòng, thấy nhau                           |
-| 5.4 | `feat/watch-party-sync`            | 🟩   | Đồng bộ play/pause/seek, clock offset, chống trôi    | host seek → tab kia theo trong **< 500ms**                  |
-| 5.5 | `feat/realtime-chat`               | 🟩   | Chat, reaction, rate limit                           | spam bị chặn, không sập phòng                               |
-| 5.6 | `feat/watch-party-resilience`      | 🟦   | Chuyển host, reconnect grace 30s, presence           | host thoát → người khác lên thay, phòng không chết          |
-| 5.7 | `feat/realtime-transcode-progress` | 🟦   | Consume `media.transcode.progress` → đẩy xuống admin | admin thấy % transcode chạy thật, không phải polling        |
-| 5.8 | `feat/web-watch-party`             | 🟨   | Panel, mời, chat, banner trạng thái kết nối          | mất mạng → banner hiện, nối lại thì tự vào lại phòng        |
-| 5.9 | `test/e2e-watch-party`             | 🟦   | Playwright 2 browser context                         | test chạy trong CI, không phải bấm tay                      |
+| Xong | #   | Nhánh                              | Loại | Làm gì                                               | Xong khi                                                    |
+| ---- | --- | ---------------------------------- | ---- | ---------------------------------------------------- | ----------------------------------------------------------- |
+| ⬜   | 5.1 | `feat/realtime-skeleton`           | 🟦   | Socket.IO gateway + auth handshake + `auth:refresh`  | kết nối được kèm token, token hết hạn thì refresh tại chỗ   |
+| ⬜   | 5.2 | `feat/realtime-redis-adapter`      | 🟦   | Redis adapter                                        | **chạy 2 instance, client ở hai bên vẫn nhận tin của nhau** |
+| ⬜   | 5.3 | `feat/watch-party-room`            | 🟩   | Tạo/vào phòng, vai trò host                          | hai tab vào cùng phòng, thấy nhau                           |
+| ⬜   | 5.4 | `feat/watch-party-sync`            | 🟩   | Đồng bộ play/pause/seek, clock offset, chống trôi    | host seek → tab kia theo trong **< 500ms**                  |
+| ⬜   | 5.5 | `feat/realtime-chat`               | 🟩   | Chat, reaction, rate limit                           | spam bị chặn, không sập phòng                               |
+| ⬜   | 5.6 | `feat/watch-party-resilience`      | 🟦   | Chuyển host, reconnect grace 30s, presence           | host thoát → người khác lên thay, phòng không chết          |
+| ⬜   | 5.7 | `feat/realtime-transcode-progress` | 🟦   | Consume `media.transcode.progress` → đẩy xuống admin | admin thấy % transcode chạy thật, không phải polling        |
+| ⬜   | 5.8 | `feat/web-watch-party`             | 🟨   | Panel, mời, chat, banner trạng thái kết nối          | mất mạng → banner hiện, nối lại thì tự vào lại phòng        |
+| ⬜   | 5.9 | `test/e2e-watch-party`             | 🟦   | Playwright 2 browser context                         | test chạy trong CI, không phải bấm tay                      |
 
 ---
 
@@ -198,18 +198,18 @@ thuộc catalog lúc đọc.
 **Mốc**: những thứ **chỉ tồn tại trong hệ phân tán** — một thao tác phải đúng xuyên
 qua 6 service, và phải đúng cả khi service chết giữa chừng.
 
-| #   | Nhánh                      | Loại | Làm gì                                                            | Xong khi                                                         |
-| --- | -------------------------- | ---- | ----------------------------------------------------------------- | ---------------------------------------------------------------- |
-| 6.1 | `feat/billing-skeleton`    | 🟦   | Service + schema + mock payment provider                          | tạo subscription giả lập được                                    |
-| 6.2 | `feat/billing-webhook`     | 🟦   | Webhook HMAC + idempotency                                        | gửi lại cùng webhook 3 lần → chỉ ghi nhận 1                      |
-| 6.3 | `feat/notification-inapp`  | 🟩   | Thông báo trong ứng dụng (email đã xong ở Phase 1)                | chuông hiện số, bấm vào đọc được                                 |
-| 6.4 | `feat/reco-content-based`  | 🟦   | Gợi ý theo nội dung + taste vector                                | người mới đăng ký cũng có gợi ý                                  |
-| 6.5 | `feat/reco-collaborative`  | 🟦   | Item-item CF + cron dựng lại                                      | xem nhiều phim → gợi ý đổi theo                                  |
-| 6.6 | `feat/saga-engine`         | 🟦   | Hạ tầng saga: lưu trạng thái bền vững, bước bù trừ, tiếp tục được | unit test: kill giữa chừng → khởi động lại → chạy tiếp đúng bước |
-| 6.7 | `feat/saga-delete-account` | 🟩   | Xoá tài khoản — 7 bước, 6 service                                 | **xoá xong dữ liệu biến mất khỏi cả 6 service**                  |
-| 6.8 | `feat/saga-upgrade-plan`   | 🟩   | Nâng gói + eventual consistency tới media                         | nâng gói → **< 2 giây** chất lượng tối đa lên 1080p              |
-| 6.9 | `feat/dlq-admin`           | 🟦   | Trang admin xem và replay DLQ                                     | gây lỗi cố ý → event vào DLQ → replay từ admin thành công        |
-| 6.A | `feat/identity-2fa`        | 🟩   | 2FA TOTP                                                          | bật 2FA, đăng nhập phải nhập mã                                  |
+| Xong | #   | Nhánh                      | Loại | Làm gì                                                            | Xong khi                                                         |
+| ---- | --- | -------------------------- | ---- | ----------------------------------------------------------------- | ---------------------------------------------------------------- |
+| ⬜   | 6.1 | `feat/billing-skeleton`    | 🟦   | Service + schema + mock payment provider                          | tạo subscription giả lập được                                    |
+| ⬜   | 6.2 | `feat/billing-webhook`     | 🟦   | Webhook HMAC + idempotency                                        | gửi lại cùng webhook 3 lần → chỉ ghi nhận 1                      |
+| ⬜   | 6.3 | `feat/notification-inapp`  | 🟩   | Thông báo trong ứng dụng (email đã xong ở Phase 1)                | chuông hiện số, bấm vào đọc được                                 |
+| ⬜   | 6.4 | `feat/reco-content-based`  | 🟦   | Gợi ý theo nội dung + taste vector                                | người mới đăng ký cũng có gợi ý                                  |
+| ⬜   | 6.5 | `feat/reco-collaborative`  | 🟦   | Item-item CF + cron dựng lại                                      | xem nhiều phim → gợi ý đổi theo                                  |
+| ⬜   | 6.6 | `feat/saga-engine`         | 🟦   | Hạ tầng saga: lưu trạng thái bền vững, bước bù trừ, tiếp tục được | unit test: kill giữa chừng → khởi động lại → chạy tiếp đúng bước |
+| ⬜   | 6.7 | `feat/saga-delete-account` | 🟩   | Xoá tài khoản — 7 bước, 6 service                                 | **xoá xong dữ liệu biến mất khỏi cả 6 service**                  |
+| ⬜   | 6.8 | `feat/saga-upgrade-plan`   | 🟩   | Nâng gói + eventual consistency tới media                         | nâng gói → **< 2 giây** chất lượng tối đa lên 1080p              |
+| ⬜   | 6.9 | `feat/dlq-admin`           | 🟦   | Trang admin xem và replay DLQ                                     | gây lỗi cố ý → event vào DLQ → replay từ admin thành công        |
+| ⬜   | 6.A | `feat/identity-2fa`        | 🟩   | 2FA TOTP                                                          | bật 2FA, đăng nhập phải nhập mã                                  |
 
 > **6.6 tách riêng khỏi 6.7** vì saga engine là hạ tầng dùng lại được, còn "xoá tài
 > khoản" là một ca cụ thể. Gộp vào một nhánh thì engine bị uốn cong theo đúng ca đó.
@@ -220,17 +220,17 @@ qua 6 service, và phải đúng cả khi service chết giữa chừng.
 
 **Mốc**: chạy trên domain công khai, có dashboard, có alert, chi phí vẫn 0đ.
 
-| #   | Nhánh                           | Loại | Làm gì                                              | Xong khi                                                  |
-| --- | ------------------------------- | ---- | --------------------------------------------------- | --------------------------------------------------------- |
-| 7.1 | `feat/observability-dashboards` | 🟦   | Grafana + Prometheus, dashboard mỗi service         | nhìn một màn hình biết service nào đang ốm                |
-| 7.2 | `feat/observability-alerts`     | 🟦   | Alert `outbox_pending_count` và DLQ                 | tắt relay → alert kêu trong vòng 2 phút                   |
-| 7.3 | `test/chaos`                    | 🟦   | Tắt từng service, ghi lại hệ thống xuống cấp ra sao | có **tài liệu** mô tả từng trường hợp, không phải trí nhớ |
-| 7.4 | `feat/i18n`                     | 🟨   | Tiếng Việt + tiếng Anh                              | đổi ngôn ngữ không phải tải lại trang                     |
-| 7.5 | `feat/a11y`                     | 🟨   | Điều hướng bàn phím, ARIA, tương phản               | dùng được toàn bộ luồng chính chỉ bằng bàn phím           |
-| 7.6 | `feat/perf-budget`              | 🟨   | Bundle < 250KB, LCP < 2.5s                          | Lighthouse **≥ 90**                                       |
-| 7.7 | `feat/pwa`                      | 🟨   | Service worker, cài được lên màn hình chính         | cài vào điện thoại, mở offline thấy trang chờ tử tế       |
-| 7.8 | `chore/deploy-cloudflare`       | 🟦   | Cloudflare Pages + Tunnel, domain `is-a.dev`        | người lạ mở được link, chi phí **0đ**                     |
-| 7.9 | `docs/readme-demo`              | 🟦   | Sơ đồ kiến trúc, ảnh chụp, GIF demo                 | người chưa biết dự án đọc README hiểu nó làm gì           |
+| Xong | #   | Nhánh                           | Loại | Làm gì                                              | Xong khi                                                  |
+| ---- | --- | ------------------------------- | ---- | --------------------------------------------------- | --------------------------------------------------------- |
+| ⬜   | 7.1 | `feat/observability-dashboards` | 🟦   | Grafana + Prometheus, dashboard mỗi service         | nhìn một màn hình biết service nào đang ốm                |
+| ⬜   | 7.2 | `feat/observability-alerts`     | 🟦   | Alert `outbox_pending_count` và DLQ                 | tắt relay → alert kêu trong vòng 2 phút                   |
+| ⬜   | 7.3 | `test/chaos`                    | 🟦   | Tắt từng service, ghi lại hệ thống xuống cấp ra sao | có **tài liệu** mô tả từng trường hợp, không phải trí nhớ |
+| ⬜   | 7.4 | `feat/i18n`                     | 🟨   | Tiếng Việt + tiếng Anh                              | đổi ngôn ngữ không phải tải lại trang                     |
+| ⬜   | 7.5 | `feat/a11y`                     | 🟨   | Điều hướng bàn phím, ARIA, tương phản               | dùng được toàn bộ luồng chính chỉ bằng bàn phím           |
+| ⬜   | 7.6 | `feat/perf-budget`              | 🟨   | Bundle < 250KB, LCP < 2.5s                          | Lighthouse **≥ 90**                                       |
+| ⬜   | 7.7 | `feat/pwa`                      | 🟨   | Service worker, cài được lên màn hình chính         | cài vào điện thoại, mở offline thấy trang chờ tử tế       |
+| ⬜   | 7.8 | `chore/deploy-cloudflare`       | 🟦   | Cloudflare Pages + Tunnel, domain `is-a.dev`        | người lạ mở được link, chi phí **0đ**                     |
+| ⬜   | 7.9 | `docs/readme-demo`              | 🟦   | Sơ đồ kiến trúc, ảnh chụp, GIF demo                 | người chưa biết dự án đọc README hiểu nó làm gì           |
 
 ---
 
