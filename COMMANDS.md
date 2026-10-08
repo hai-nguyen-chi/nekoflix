@@ -147,6 +147,7 @@ pnpm db:list           # xem các bản đã có
 | Lệnh                      | Cần gì                               |
 | ------------------------- | ------------------------------------ |
 | `pnpm test`               | Không cần hạ tầng                    |
+| `pnpm ci:local`           | Chạy đúng chuỗi lệnh của CI          |
 | `pnpm smoke`              | Cần hạ tầng **và** service đang chạy |
 | `pnpm verify:idempotency` | Cần hạ tầng **và** service đang chạy |
 

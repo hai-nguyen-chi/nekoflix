@@ -50,11 +50,18 @@ Tiền tố quyết định nhánh được merge vào đâu — CI chặn nếu
 Làm xong:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test
+pnpm ci:local
 git push -u origin feat/catalog-service
 ```
 
 Rồi mở PR trên GitHub, **base là `develop`**.
+
+`pnpm ci:local` chạy **đúng chuỗi lệnh của job CI**, kể cả
+`pnpm install --frozen-lockfile`. Bước `--frozen-lockfile` là thứ `pnpm install`
+thường ngày KHÔNG kiểm: nó bắt lỗi `pnpm-lock.yaml` lệch so với workspace — ví dụ
+sau khi xoá hoặc đổi tên một service mà quên chạy lại `pnpm install`. Lệch kiểu đó
+chạy ở máy vẫn bình thường vì `node_modules` đã có sẵn, nhưng CI cài từ đầu thì đỏ
+ngay.
 
 ### Nhánh sống lâu thì phải đồng bộ
 
