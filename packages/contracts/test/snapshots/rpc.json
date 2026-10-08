@@ -1325,6 +1325,2406 @@
       "nullable": false
     }
   },
+  "catalog.titles.list#request": {
+    "cursor": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "genre": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "genre[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "limit": {
+      "type": "number<int,max,min>",
+      "optional": true,
+      "nullable": false
+    },
+    "rating": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "sort": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "newest",
+        "popularity",
+        "rating",
+        "title"
+      ]
+    },
+    "type": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "yearFrom": {
+      "type": "number<int>",
+      "optional": true,
+      "nullable": false
+    },
+    "yearTo": {
+      "type": "number<int>",
+      "optional": true,
+      "nullable": false
+    }
+  },
+  "catalog.titles.list#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "items[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "items[].year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "nextCursor": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.titles.get#request": {
+    "idOrSlug": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.titles.get#response": {
+    "title": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.country": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.country[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].character": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].order": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[].job": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "director",
+        "producer",
+        "writer"
+      ]
+    },
+    "title.credits.crew[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.endDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.genres": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images.logoUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.images.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.keywords": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.keywords[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "title.movie": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.assetId": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.creditsStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.introEnd": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.introStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.originalTitle": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.releaseDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons": {
+      "type": "array",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].airDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[].description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].episodeCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[].seasonNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.spokenLanguages": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.spokenLanguages[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.avgRating": {
+      "type": "number",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.ratingCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.viewCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.tagline": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.trailer": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "title.trailer.key": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.trailer.provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "local",
+        "youtube"
+      ]
+    },
+    "title.type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "title.year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.titles.byIds#request": {
+    "ids": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "ids[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.titles.byIds#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "items[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "items[].year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.titles.similar#request": {
+    "limit": {
+      "type": "number<int,max,min>",
+      "optional": true,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.titles.similar#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "items[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "items[].year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.episodes.list#request": {
+    "seasonNumber": {
+      "type": "number<int>",
+      "optional": true,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.episodes.list#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].airDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].assetId": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].creditsStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].episodeNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].introEnd": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].introStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].seasonNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].stillUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.episodes.get#request": {
+    "episodeId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.episodes.get#response": {
+    "episode": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "episode.airDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "episode.assetId": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "episode.creditsStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "episode.description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "episode.episodeNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "episode.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "episode.introEnd": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "episode.introStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "episode.name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "episode.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "episode.seasonNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "episode.stillUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "episode.titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.search#request": {
+    "genre": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "genre[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "limit": {
+      "type": "number<int,max,min>",
+      "optional": true,
+      "nullable": false
+    },
+    "q": {
+      "type": "string<max,min>",
+      "optional": false,
+      "nullable": false
+    },
+    "rating": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "type": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "yearFrom": {
+      "type": "number<int>",
+      "optional": true,
+      "nullable": false
+    },
+    "yearTo": {
+      "type": "number<int>",
+      "optional": true,
+      "nullable": false
+    }
+  },
+  "catalog.search#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "items[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "items[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "items[].year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "total": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.suggest#request": {
+    "limit": {
+      "type": "number<int,max,min>",
+      "optional": true,
+      "nullable": false
+    },
+    "q": {
+      "type": "string<max,min>",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.suggest#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.rows.get#request": {
+    "itemsPerRow": {
+      "type": "number<int,max,min>",
+      "optional": true,
+      "nullable": false
+    },
+    "maxMaturity": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    }
+  },
+  "catalog.rows.get#response": {
+    "hero": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.country": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.country[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.cast": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.cast[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.cast[].character": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.cast[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.cast[].order": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.cast[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.crew": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.crew[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.crew[].job": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "director",
+        "producer",
+        "writer"
+      ]
+    },
+    "hero.credits.crew[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.credits.crew[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.endDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.genres": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.genres[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.genres[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.genres[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.genres[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.images": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.images.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.images.logoUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.images.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.keywords": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.keywords[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "hero.movie": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.movie.assetId": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.movie.creditsStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.movie.introEnd": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.movie.introStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.movie.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.originalTitle": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.releaseDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.seasons": {
+      "type": "array",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.seasons[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.seasons[].airDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.seasons[].description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.seasons[].episodeCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.seasons[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.seasons[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.seasons[].seasonNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.spokenLanguages": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.spokenLanguages[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.stats": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.stats.avgRating": {
+      "type": "number",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.stats.ratingCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.stats.viewCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.tagline": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.trailer": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "hero.trailer.key": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "hero.trailer.provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "local",
+        "youtube"
+      ]
+    },
+    "hero.type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "hero.year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "rows": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items[].backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items[].maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "rows[].items[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items[].runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "rows[].items[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].items[].type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "rows[].items[].year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "rows[].key": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "rows[].layout": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "backdrop",
+        "poster",
+        "ranked"
+      ]
+    },
+    "rows[].title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.genres.list#request": {
+    "lang": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "en",
+        "vi"
+      ]
+    }
+  },
+  "catalog.genres.list#response": {
+    "items": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "items[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "items[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.admin.createTitle#request": {
+    "country": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "country[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "description": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "genreIds": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "genreIds[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "keywords": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "keywords[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "originalTitle": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "releaseDate": {
+      "type": "string<datetime>",
+      "optional": true,
+      "nullable": true
+    },
+    "slug": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    },
+    "spokenLanguages": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "spokenLanguages[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "tagline": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "title": {
+      "type": "string<min>",
+      "optional": false,
+      "nullable": false
+    },
+    "type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    }
+  },
+  "catalog.admin.createTitle#response": {
+    "title": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.country": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.country[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].character": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].order": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[].job": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "director",
+        "producer",
+        "writer"
+      ]
+    },
+    "title.credits.crew[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.endDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.genres": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images.logoUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.images.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.keywords": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.keywords[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "title.movie": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.assetId": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.creditsStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.introEnd": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.introStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.originalTitle": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.releaseDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons": {
+      "type": "array",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].airDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[].description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].episodeCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[].seasonNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.spokenLanguages": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.spokenLanguages[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.avgRating": {
+      "type": "number",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.ratingCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.viewCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.tagline": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.trailer": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "title.trailer.key": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.trailer.provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "local",
+        "youtube"
+      ]
+    },
+    "title.type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "title.year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.admin.updateTitle#request": {
+    "country": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "country[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "description": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "genreIds": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "genreIds[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "keywords": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "keywords[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "maturityRating": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "originalTitle": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "releaseDate": {
+      "type": "string<datetime>",
+      "optional": true,
+      "nullable": true
+    },
+    "slug": {
+      "type": "string<min>",
+      "optional": true,
+      "nullable": false
+    },
+    "spokenLanguages": {
+      "type": "array",
+      "optional": true,
+      "nullable": false
+    },
+    "spokenLanguages[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "tagline": {
+      "type": "string",
+      "optional": true,
+      "nullable": false
+    },
+    "title": {
+      "type": "string<min>",
+      "optional": true,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "type": {
+      "type": "enum",
+      "optional": true,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    }
+  },
+  "catalog.admin.updateTitle#response": {
+    "title": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.country": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.country[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].character": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].order": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.cast[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[].job": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "director",
+        "producer",
+        "writer"
+      ]
+    },
+    "title.credits.crew[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.credits.crew[].personId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.endDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.genres": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.genres[].slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.id": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images.backdropUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.images.logoUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.images.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.keywords": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.keywords[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.maturityRating": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
+    },
+    "title.movie": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.assetId": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.creditsStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.introEnd": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.introStart": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.movie.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.originalTitle": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.releaseDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.runtimeSec": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons": {
+      "type": "array",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[]": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].airDate": {
+      "type": "string<datetime>",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[].description": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].episodeCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].name": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.seasons[].posterUrl": {
+      "type": "string",
+      "optional": false,
+      "nullable": true
+    },
+    "title.seasons[].seasonNumber": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.slug": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.spokenLanguages": {
+      "type": "array",
+      "optional": false,
+      "nullable": false
+    },
+    "title.spokenLanguages[]": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats": {
+      "type": "object",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.avgRating": {
+      "type": "number",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.ratingCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.stats.viewCount": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": false
+    },
+    "title.tagline": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.title": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.trailer": {
+      "type": "object",
+      "optional": false,
+      "nullable": true
+    },
+    "title.trailer.key": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    },
+    "title.trailer.provider": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "local",
+        "youtube"
+      ]
+    },
+    "title.type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    },
+    "title.year": {
+      "type": "number<int>",
+      "optional": false,
+      "nullable": true
+    }
+  },
+  "catalog.admin.publishTitle#request": {
+    "published": {
+      "type": "boolean",
+      "optional": true,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.admin.publishTitle#response": {
+    "status": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "archived",
+        "draft",
+        "published"
+      ]
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.admin.deleteTitle#request": {
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.admin.deleteTitle#response": {
+    "deleted": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    }
+  },
+  "catalog.admin.importTmdb#request": {
+    "tmdbId": {
+      "type": "number<int,min>",
+      "optional": false,
+      "nullable": false
+    },
+    "type": {
+      "type": "enum",
+      "optional": false,
+      "nullable": false,
+      "values": [
+        "movie",
+        "series"
+      ]
+    }
+  },
+  "catalog.admin.importTmdb#response": {
+    "created": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "titleId": {
+      "type": "string",
+      "optional": false,
+      "nullable": false
+    }
+  },
   "notification.list#request": {
     "limit": {
       "type": "number<int,max,min>",

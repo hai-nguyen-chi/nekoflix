@@ -52,6 +52,37 @@ import {
   resetPasswordResponse,
 } from './password';
 import {
+  createTitleRequest,
+  deleteTitleRequest,
+  deleteTitleResponse,
+  getEpisodeRequest,
+  getEpisodeResponse,
+  getRowsRequest,
+  getRowsResponse,
+  getTitleRequest,
+  getTitleResponse,
+  importTmdbRequest,
+  importTmdbResponse,
+  listEpisodesRequest,
+  listEpisodesResponse,
+  listGenresRequest,
+  listGenresResponse,
+  listTitlesRequest,
+  listTitlesResponse,
+  publishTitleRequest,
+  publishTitleResponse,
+  searchRequest,
+  searchResponse,
+  similarTitlesRequest,
+  similarTitlesResponse,
+  suggestRequest,
+  suggestResponse,
+  titlesByIdsRequest,
+  titlesByIdsResponse,
+  updateTitleRequest,
+  adminTitleResponse,
+} from './catalog';
+import {
   listNotificationsRequest,
   listNotificationsResponse,
   markReadRequest,
@@ -63,6 +94,7 @@ export * from './profile';
 export * from './oauth';
 export * from './password';
 export * from './notification';
+export * from './catalog';
 
 /**
  * Nguồn sự thật cho mọi NATS request/reply.
@@ -98,6 +130,23 @@ export const RPC_REGISTRY = {
   'identity.password.forgot': { request: forgotPasswordRequest, response: forgotPasswordResponse },
   'identity.password.reset': { request: resetPasswordRequest, response: resetPasswordResponse },
   'identity.password.change': { request: changePasswordRequest, response: changePasswordResponse },
+
+  'catalog.titles.list': { request: listTitlesRequest, response: listTitlesResponse },
+  'catalog.titles.get': { request: getTitleRequest, response: getTitleResponse },
+  'catalog.titles.byIds': { request: titlesByIdsRequest, response: titlesByIdsResponse },
+  'catalog.titles.similar': { request: similarTitlesRequest, response: similarTitlesResponse },
+  'catalog.episodes.list': { request: listEpisodesRequest, response: listEpisodesResponse },
+  'catalog.episodes.get': { request: getEpisodeRequest, response: getEpisodeResponse },
+  'catalog.search': { request: searchRequest, response: searchResponse },
+  'catalog.suggest': { request: suggestRequest, response: suggestResponse },
+  'catalog.rows.get': { request: getRowsRequest, response: getRowsResponse },
+  'catalog.genres.list': { request: listGenresRequest, response: listGenresResponse },
+
+  'catalog.admin.createTitle': { request: createTitleRequest, response: adminTitleResponse },
+  'catalog.admin.updateTitle': { request: updateTitleRequest, response: adminTitleResponse },
+  'catalog.admin.publishTitle': { request: publishTitleRequest, response: publishTitleResponse },
+  'catalog.admin.deleteTitle': { request: deleteTitleRequest, response: deleteTitleResponse },
+  'catalog.admin.importTmdb': { request: importTmdbRequest, response: importTmdbResponse },
 
   'notification.list': { request: listNotificationsRequest, response: listNotificationsResponse },
   'notification.markRead': { request: markReadRequest, response: markReadResponse },

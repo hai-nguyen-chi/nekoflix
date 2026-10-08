@@ -55,7 +55,10 @@ describe('Registry của event', () => {
 
   it('isKnownEventType từ chối event lạ', () => {
     expect(isKnownEventType('identity.user.registered')).toBe(true);
-    expect(isKnownEventType('catalog.title.published')).toBe(false);
+    // Tên vô nghĩa có chủ đích. Dùng một event CÓ TRONG ROADMAP làm ví dụ
+    // "không tồn tại" thì test sẽ đỏ đúng ngày ai đó cài đặt nó — đã xảy ra
+    // một lần với `catalog.title.published`.
+    expect(isKnownEventType('khongcogi.khong.ton_tai')).toBe(false);
   });
 });
 
