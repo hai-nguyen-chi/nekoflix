@@ -14,6 +14,7 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,json,md,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md,yml}\"",
+    "ci:local": "pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm format:check && pnpm test",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d --wait mongo redis nats storage jaeger mailpit mongo-express && docker compose -f infra/docker-compose.yml up mongo-init storage-init",
     "infra:down": "docker compose -f infra/docker-compose.yml down",
     "infra:reset": "docker compose -f infra/docker-compose.yml down -v",

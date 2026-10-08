@@ -15,7 +15,8 @@
 <!-- Đã chạy gì để biết nó đúng? Dán kết quả nếu có.
      "Chạy thử thấy ổn" không phải kiểm chứng. -->
 
-- [ ] `pnpm lint && pnpm typecheck && pnpm test`
+- [ ] **`pnpm ci:local`** — chạy đúng chuỗi lệnh của job CI, gồm cả
+      `--frozen-lockfile`. Xanh ở đây thì CI gần như chắc chắn xanh.
 - [ ] `pnpm smoke` (nếu có đụng tới luồng chạy thật)
 
 ## Rủi ro cần để ý

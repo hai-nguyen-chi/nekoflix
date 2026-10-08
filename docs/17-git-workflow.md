@@ -50,11 +50,18 @@ Tiền tố quyết định nhánh được merge vào đâu — CI chặn nếu
 Làm xong:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test
+pnpm ci:local
 git push -u origin feat/catalog-service
 ```
 
 Rồi mở PR trên GitHub, **base là `develop`**.
+
+`pnpm ci:local` chạy **đúng chuỗi lệnh của job CI**, kể cả
+`pnpm install --frozen-lockfile`. Bước `--frozen-lockfile` là thứ `pnpm install`
+thường ngày KHÔNG kiểm: nó bắt lỗi `pnpm-lock.yaml` lệch so với workspace — ví dụ
+sau khi xoá hoặc đổi tên một service mà quên chạy lại `pnpm install`. Lệch kiểu đó
+chạy ở máy vẫn bình thường vì `node_modules` đã có sẵn, nhưng CI cài từ đầu thì đỏ
+ngay.
 
 ### Nhánh sống lâu thì phải đồng bộ
 
@@ -70,16 +77,21 @@ git merge develop          # KHÔNG rebase — xem §5
 
 ## 2. Đưa lên staging (chuẩn bị phát hành)
 
+Ba nhánh môi trường bị chặn push thẳng (§8), nên bước này làm **trên GitHub**:
+
+1. **Pull requests → New pull request**
+2. base = `staging`, compare = `develop`
+3. Tiêu đề: `release: develop -> staging (<nội dung>)`
+4. Chờ CI xanh → **Merge pull request** → chọn **"Create a merge commit"**
+
+Rồi kéo về máy:
+
 ```bash
 git checkout staging && git pull
-git merge --no-ff develop
-git push
 ```
 
-Hoặc mở PR `develop` → `staging` trên GitHub, chọn **"Create a merge commit"**.
-
-> **TUYỆT ĐỐI không dùng "Squash and merge" cho PR này.** Lý do ở §5 — đây là
-> cái bẫy làm hỏng GitFlow nhiều nhất.
+> **TUYỆT ĐỐI không chọn "Squash and merge" cho PR này.** Lý do ở §5.1 — đây là
+> cái bẫy làm hỏng GitFlow nhiều nhất. Nút đó nằm ngay cạnh nút đúng.
 
 Từ lúc này `staging` là **bản ứng viên phát hành**. Tính năng mới vẫn chảy vào
 `develop` bình thường, không ảnh hưởng tới bản đang kiểm.
@@ -91,15 +103,20 @@ lại merge `develop` → `staging`.
 
 ## 3. Phát hành
 
+Trên GitHub: PR base = `master`, compare = `staging`, **"Create a merge commit"**.
+
+Rồi gắn tag ở máy:
+
 ```bash
 git checkout master && git pull
-git merge --no-ff staging
 git tag -a v0.2.0 -m "Phase 1: identity, multi-profile, OAuth"
-git push --follow-tags
+git push origin v0.2.0
 ```
 
-`--follow-tags` đẩy cả commit lẫn tag. Đẩy riêng `git push` thì tag nằm lại trên
-máy, và lịch sử phát hành trên GitHub trống trơn.
+Đẩy tag KHÔNG bị ruleset chặn — rule chỉ áp cho nhánh, không áp cho tag.
+
+Quên `git push origin v0.2.0` thì tag nằm lại trên máy và trang Releases trên
+GitHub trống trơn. Kiểm tra bằng `git ls-remote --tags origin`.
 
 Tag theo [semver](https://semver.org/lang/vi/): `v<major>.<minor>.<patch>`.
 
@@ -126,10 +143,14 @@ PR vào `master`, merge, tag `v0.2.1`.
 
 ### Rồi BẮT BUỘC đưa ngược xuống
 
-```bash
-git checkout staging && git pull && git merge master && git push
-git checkout develop && git pull && git merge staging && git push
-```
+Hai PR nữa, cũng trên GitHub:
+
+| #   | base      | compare   |
+| --- | --------- | --------- |
+| 1   | `staging` | `master`  |
+| 2   | `develop` | `staging` |
+
+Cả hai dùng **merge commit**, không squash.
 
 **Bỏ bước này là bug sống lại.** `develop` vẫn chứa code cũ còn lỗi; lần phát hành
 sau nó leo lên `master` và ghi đè bản vá. Triệu chứng kinh điển: "sao lỗi này đã
@@ -216,16 +237,16 @@ git checkout develop && git pull && git checkout -b feat/<tên>
 # Đồng bộ nhánh đang làm với develop
 git checkout develop && git pull && git checkout - && git merge develop
 
-# Đưa develop lên staging
-git checkout staging && git pull && git merge --no-ff develop && git push
+# Đưa develop lên staging  -> PR trên GitHub (base staging, compare develop)
+git checkout staging && git pull          # kéo về sau khi merge xong
 
-# Phát hành
-git checkout master && git pull && git merge --no-ff staging
-git tag -a v0.2.0 -m "..." && git push --follow-tags
+# Phát hành  -> PR trên GitHub (base master, compare staging), rồi:
+git checkout master && git pull
+git tag -a v0.2.0 -m "..." && git push origin v0.2.0
 
-# Sau hotfix — ĐỪNG QUÊN
-git checkout staging && git merge master && git push
-git checkout develop && git merge staging && git push
+# Sau hotfix — ĐỪNG QUÊN hai PR back-merge:
+#   base staging  <- compare master
+#   base develop  <- compare staging
 
 # Xoá nhánh đã merge (cả local lẫn remote)
 git branch -d feat/<tên> && git push origin --delete feat/<tên>
@@ -236,24 +257,114 @@ git fetch --prune
 
 ---
 
-## 8. Cần bật trên GitHub (không làm bằng lệnh được)
+## 8. Ruleset trên GitHub
 
-Vào **Settings → Branches → Add branch ruleset**, áp cho cả ba nhánh
-`master`, `staging`, `develop`:
+Quy trình ở các mục trên mới chỉ là thoả thuận. Ruleset biến nó thành **ràng buộc
+không lách được** — kể cả lúc 11 giờ đêm và bạn chỉ muốn sửa một dòng cho xong.
 
-- ☑ **Require a pull request before merging** — chặn push thẳng
-- ☑ **Require status checks to pass** → chọn `Lint · Typecheck · Build · Test`,
-  `Smoke test (hạ tầng thật)`, `Hướng merge`
-- ☑ **Require branches to be up to date before merging**
+Phần này phải bấm trên web, không có lệnh `git` tương đương.
+
+### 8.1 Tạo ruleset
+
+**Settings → Rules → Rulesets → New ruleset → New branch ruleset**
+
+| Mục                | Đặt là                                      |
+| ------------------ | ------------------------------------------- |
+| Ruleset Name       | `Nhánh môi trường`                          |
+| Enforcement status | **Active**                                  |
+| Bypass list        | **ĐỂ TRỐNG**                                |
+| Target branches    | `develop`, `staging`, `master` (thêm 3 lần) |
+
+Ở **Target branches** bấm **Add target → Include by pattern**, gõ `develop`, Add.
+Lặp lại cho `staging` và `master`.
+
+> **`Enforcement status` để `Evaluate` thì ruleset chỉ ghi log, không chặn gì.**
+> Đó là chế độ chạy thử. Phải là **Active**.
+
+> **Bypass list để trống.** Thêm chính mình hoặc "Repository admin" vào đó là vô
+> hiệu hoá toàn bộ ruleset đối với bạn — mà bạn lại là người duy nhất push. Lúc
+> đó rule vẫn hiện màu xanh trong Settings nhưng không chặn gì cả.
+
+### 8.2 Bật những rule này
+
+- ☑ **Restrict deletions**
+  → không ai xoá được `develop` / `staging` / `master`
+
 - ☑ **Block force pushes**
+  → không ai `--force` ghi đè lịch sử ba nhánh này
 
-Và **Settings → General → Default branch** đổi sang `develop`. Mặc định là
-`develop` chứ không phải `master`: nó làm PR tự nhắm đúng đích, và người lạ vào
-repo thấy ngay nhánh đang phát triển.
+- ☑ **Require a pull request before merging**
+  → **chặn push thẳng**. Mọi thay đổi phải qua PR.
+  - **Required approvals: `0`** ← xem §8.3
+  - ☐ Require review from Code Owners (repo chưa có `CODEOWNERS`)
+  - ☑ Dismiss stale pull request approvals when new commits are pushed
 
-> Dự án một người thì "require pull request" nghe thừa — nhưng nó chính là thứ
-> biến quy trình từ thoả thuận với bản thân thành ràng buộc không lách được, kể
-> cả lúc vội.
+- ☑ **Require status checks to pass**
+  - ☑ Require branches to be up to date before merging
+  - Thêm check: `Lint · Typecheck · Build · Test` và `Smoke test (hạ tầng thật)`
+  - `Hướng merge` thêm sau — xem §8.4
+
+### 8.3 Bẫy lớn nhất với dự án một người
+
+**Required approvals phải là `0`.**
+
+Đặt `1` thì GitHub yêu cầu một người KHÁC duyệt PR. Bạn không tự duyệt PR của
+mình được. Repo một người + `1` approval = **không PR nào merge được bao giờ**, và
+lối thoát duy nhất là tự cho mình vào bypass list — tức là tháo bỏ toàn bộ rule.
+
+`0` vẫn giữ nguyên điều bạn cần: không push thẳng, phải qua PR, CI phải xanh.
+Chỉ bỏ đi bước duyệt vốn không có ai thực hiện.
+
+### 8.4 Thứ tự làm, để không bị kẹt
+
+Check `Hướng merge` **chỉ chạy trên pull request**, nên tới giờ nó chưa chạy lần
+nào và sẽ không hiện trong ô tìm kiếm status check.
+
+1. Tạo ruleset như §8.1–8.2, tạm thời **chưa** thêm `Hướng merge`
+2. Mở PR đầu tiên (`docs/*` → `develop`) — `Hướng merge` chạy lần đầu
+3. Quay lại ruleset, thêm `Hướng merge` vào danh sách check bắt buộc
+
+### 8.5 Những rule KHÔNG được bật
+
+| Rule                       | Vì sao không                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Require linear history** | Cấm merge commit → phá vỡ `develop → staging → master`, vốn **bắt buộc** dùng merge commit (§5.1) |
+| **Require signed commits** | Repo chưa cấu hình GPG/SSH signing → chặn sạch mọi commit                                         |
+| **Restrict updates**       | Chặn cả thao tác merge PR, không chỉ push thẳng                                                   |
+| **Restrict creations**     | Chặn luôn việc tạo nhánh `feat/*`                                                                 |
+
+### 8.6 Kiểm tra rule có thật sự chặn không
+
+Rule hiện màu xanh trong Settings không có nghĩa là nó đang chạy. Thử thật:
+
+```bash
+git checkout develop && git pull
+echo "# thử" >> README.md
+git commit -am "test: thử push thẳng" && git push
+```
+
+**Phải** nhận được:
+
+```
+! [remote rejected] develop -> develop (protected branch hook declined)
+```
+
+Nhận được như vậy là xong. Dọn lại:
+
+```bash
+git reset --hard origin/develop
+```
+
+Nếu push **thành công** thì ruleset chưa có tác dụng — kiểm tra lại ba thứ:
+Enforcement status có phải `Active`, Bypass list có trống không, và Target
+branches có đúng tên nhánh không.
+
+Thử nốt rule xoá nhánh:
+
+```bash
+git push origin --delete staging
+# phải nhận: [remote rejected] staging (refusing to delete ...)
+```
 
 ---
 
