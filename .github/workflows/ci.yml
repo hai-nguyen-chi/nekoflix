@@ -78,6 +78,46 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm format:check
+
+      # Giữ lại binary MongoDB giữa các lần chạy CI. Không có cache thì mỗi
+      # run tải lại ~70MB, và đó cũng là lúc dễ tranh chấp lockfile nhất.
+      #
+      # Hai đường dẫn vì mongodb-memory-server chọn chỗ lưu tuỳ môi trường:
+      # trên runner của GitHub nó dùng ~/.cache/mongodb-binaries (thấy trong
+      # log lỗi), còn trong container node:22 lại dùng node_modules/.cache.
+      # Cache cả hai thì khỏi phụ thuộc vào việc nó chọn đường nào.
+      - name: Cache binary MongoDB
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/mongodb-binaries
+            node_modules/.cache/mongodb-memory-server
+          key: mongodb-binaries-${{ runner.os }}
+
+      # BẮT BUỘC chạy trước `pnpm test`.
+      #
+      # Test của identity-service có 5 file spec, vitest chạy chúng SONG SONG,
+      # mỗi file dựng một MongoMemoryReplSet riêng. Lần đầu trên máy sạch, cả
+      # năm tiến trình cùng thấy chưa có binary và cùng đi tải — rồi giành
+      # nhau 7.0.x.lock:
+      #
+      #   UnableToUnlockLockfileError: Cannot unlock file "...7.0.24.lock",
+      #   because it is not locked by this process
+      #
+      # Ở máy dev không bao giờ thấy vì binary đã nằm sẵn trong cache. Đây là
+      # lỗi chập chờn: CI từng xanh ở những run trước với đúng code này.
+      #
+      # Khởi động một instance trước để tải xong và nhả lock, rồi mới cho
+      # test chạy song song.
+      - name: Nạp sẵn binary MongoDB
+        run: |
+          node -e "
+            const { MongoMemoryServer } = require('mongodb-memory-server');
+            MongoMemoryServer.create()
+              .then((s) => s.stop())
+              .then(() => console.log('binary MongoDB sẵn sàng'));
+          "
+
       # Gồm cả contract test: producer và consumer có còn nói cùng một
       # ngôn ngữ không. Đây là thứ bắt lỗi breaking change TRƯỚC khi nó
       # ra tới hạ tầng thật ở job dưới.

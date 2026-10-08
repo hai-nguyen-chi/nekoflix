@@ -13,6 +13,7 @@ Mở file này khi quên lệnh hoặc khi có gì đó hỏng.
 ## 0. Mười lệnh dùng nhiều nhất
 
 ```bash
+pnpm progress                    # tiến độ feature, suy ra từ git
 pnpm infra:up                    # bật hạ tầng Docker
 pnpm dev:auth                    # chạy app (để nguyên cửa sổ)   -> localhost:5173
 pnpm ci:local                    # chạy đúng chuỗi lệnh của CI   (gõ trước khi push)
@@ -266,6 +267,23 @@ UPDATE_CONTRACT_SNAPSHOT=1 pnpm --filter @nekoflix/contracts test
 
 Commit `packages/contracts/test/snapshots/*.json` **cùng PR** với thay đổi schema
 — diff của snapshot chính là thứ người review cần nhìn.
+
+### Tiến độ
+
+| Lệnh            | Làm gì                                                 |
+| --------------- | ------------------------------------------------------ |
+| `pnpm progress` | Feature nào xong / đang làm / chưa làm, và làm gì tiếp |
+
+Trạng thái **suy ra từ git**, không gõ tay: một feature tính là xong khi mã của nó
+xuất hiện trong lịch sử commit của `develop`.
+
+```
+feat(catalog): text index bỏ dấu tiếng Việt (2.5)
+                                            ^^^^^ mã này
+```
+
+Quên ghi mã thì feature vẫn hiện là chưa làm — đó là chủ đích, nó nhắc ngay ở lần
+chạy kế tiếp. Danh sách feature nằm ở [docs/11-roadmap.md](docs/11-roadmap.md).
 
 ### Database
 
