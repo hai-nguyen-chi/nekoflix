@@ -52,7 +52,8 @@ Mỗi service sở hữu database riêng, không ai đọc DB của ai. Ghi DB +
 | **14** | [**Inter-service Communication**](docs/14-inter-service-communication.md) | Outbox, idempotency, saga, DLQ, contract test   |
 | **15** | [**Đọc hiểu code**](docs/15-code-walkthrough.md)                          | File nào làm gì, ai gọi ai, config từ đâu       |
 | **16** | [**Cấu hình OAuth**](docs/16-oauth-setup.md)                              | Lấy credential Google/GitHub, luồng PKCE        |
-| —      | [ADR](docs/adr/)                                                          | 14 Architecture Decision Records                |
+| **17** | [**Quy trình Git**](docs/17-git-workflow.md)                              | Ba nhánh môi trường, PR, hotfix, phát hành      |
+| —      | [ADR](docs/adr/)                                                          | 15 Architecture Decision Records                |
 
 > **Mới bắt đầu?** Chạy được rồi thì đọc [15 — Đọc hiểu code](docs/15-code-walkthrough.md) trước.
 > Muốn hiểu thiết kế: [00](docs/00-overview.md) → [02](docs/02-architecture.md) → [13](docs/13-service-catalog.md) → [14](docs/14-inter-service-communication.md).

@@ -3,6 +3,7 @@
 Mở file này khi quên lệnh hoặc khi có gì đó hỏng.
 
 - Setup & start từng bước → [RUN.md](RUN.md)
+- Quy trình nhánh / PR / phát hành → [docs/17-git-workflow.md](docs/17-git-workflow.md)
 - Lần đầu cài máy mới, chưa có Docker → [GETTING-STARTED.md](GETTING-STARTED.md)
 - Code chạy ra sao → [docs/15-code-walkthrough.md](docs/15-code-walkthrough.md)
 - Phase 0 có gì (tài liệu lịch sử) → [PHASE-0.md](PHASE-0.md)
@@ -39,15 +40,20 @@ Không tắt cũng không sao — Docker tự thu hồi RAM khi container rảnh
 
 ```bash
 # ── Máy A, trước khi rời ──
-git add -A && git commit -m "feat: ..." && git push
+git add -A && git commit -m "feat: ..."
+git push -u origin feat/<tên-nhánh>     # đẩy cả nhánh dở dang cũng không sao
 
 # ── Máy B ──
-git pull
+git fetch
+git checkout feat/<tên-nhánh>
 pnpm install           # nếu package.json đổi
 pnpm build
 pnpm infra:up
 pnpm dev:auth
 ```
+
+Làm việc trên **nhánh riêng**, không phải `develop` — nhờ vậy đẩy code dở dang
+lên cũng không ảnh hưởng máy kia. Xem [docs/17](docs/17-git-workflow.md).
 
 Tài khoản đã tạo ở máy A **không có** ở máy B. Đăng ký lại một tài khoản mới qua
 giao diện web, mất 30 giây.
@@ -114,6 +120,17 @@ pnpm db:list           # xem các bản đã có
 | `pnpm typecheck`                | Kiểm tra lỗi kiểu dữ liệu                      |
 | `pnpm format`                   | Tự sửa định dạng                               |
 | `pnpm new:service <tên> <cổng>` | Tạo service mới theo khuôn chuẩn               |
+
+### Git
+
+| Lệnh                                                                      | Làm gì                     |
+| ------------------------------------------------------------------------- | -------------------------- |
+| `git checkout develop && git pull && git checkout -b feat/x`              | Bắt đầu tính năng mới      |
+| `git checkout develop && git pull && git checkout - && git merge develop` | Đồng bộ nhánh đang làm     |
+| `git fetch --prune`                                                       | Dọn nhánh remote đã bị xoá |
+| `git branch -d feat/x && git push origin --delete feat/x`                 | Xoá nhánh đã merge         |
+
+Đưa lên staging, phát hành, hotfix: xem [docs/17 §7](docs/17-git-workflow.md).
 
 ### Database
 
