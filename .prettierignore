@@ -3,3 +3,8 @@ dist/
 .turbo/
 coverage/
 pnpm-lock.yaml
+
+# Snapshot hợp đồng: do test tự ghi bằng JSON.stringify.
+# Để Prettier đụng vào thì mỗi lần cập nhật sẽ sinh ra một diff đầy nhiễu
+# định dạng, mà diff chính là thứ người review cần đọc.
+packages/contracts/test/snapshots/

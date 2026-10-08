@@ -216,14 +216,14 @@ diện) và 4000 (API); phần còn lại nằm sau NATS.
 Chạy ở cửa sổ thứ hai, trong khi `pnpm dev:auth` vẫn đang chạy:
 
 ```bash
-pnpm smoke                # 25 kiểm tra trên hạ tầng thật, ~20 giây
+pnpm smoke                # 31 kiểm tra trên hạ tầng thật, ~25 giây
 pnpm verify:idempotency   # event bị giao lại không sinh email thứ hai
 ```
 
 Không cần hạ tầng:
 
 ```bash
-pnpm test                 # 162 test, gồm contract test
+pnpm test                 # 163 test, gồm contract test
 pnpm lint
 pnpm typecheck
 ```

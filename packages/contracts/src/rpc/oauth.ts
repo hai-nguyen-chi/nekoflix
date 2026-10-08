@@ -68,6 +68,18 @@ export const listLinkedResponse = z.object({
   items: z.array(linkedAccount),
   /** false khi gỡ nốt sẽ làm mất đường vào tài khoản */
   canUnlink: z.boolean(),
+  /**
+   * Tài khoản đã có mật khẩu chưa.
+   *
+   * Tài khoản tạo qua OAuth không có mật khẩu, nên form "đổi mật khẩu" phải
+   * biến thành "đặt mật khẩu" và KHÔNG hỏi mật khẩu hiện tại. Không có cờ
+   * này, giao diện chỉ còn cách hiện một ô bắt buộc mà người dùng không thể
+   * điền đúng.
+   *
+   * Đặt ở đây chứ không ở `publicUser`: `canUnlink` vốn đã suy ra từ cùng
+   * một sự thật, và trang Bảo mật chỉ cần một lời gọi.
+   */
+  hasPassword: z.boolean(),
 });
 export type ListLinkedResponse = z.infer<typeof listLinkedResponse>;
 

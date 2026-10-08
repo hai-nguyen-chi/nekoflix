@@ -288,6 +288,7 @@ export class OAuthService {
       })),
       // Gỡ nốt liên kết cuối khi không có mật khẩu = mất đường vào tài khoản
       canUnlink: user.passwordHash !== null || user.oauthAccounts.length > 1,
+      hasPassword: user.passwordHash !== null,
     };
   }
 

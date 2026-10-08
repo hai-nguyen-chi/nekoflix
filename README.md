@@ -103,8 +103,8 @@ Cửa sổ thứ hai: `pnpm smoke` để kiểm chứng toàn bộ đường dâ
 pnpm build               6/6 xanh
 pnpm lint                6/6 xanh    (rào chắn kiến trúc, đã kiểm chứng chặn thật)
 pnpm typecheck           8/8 xanh
-pnpm test                162 xanh    (gồm contract test producer + consumer)
-pnpm smoke               đạt         (hạ tầng Docker thật)
+pnpm test                163 xanh    (gồm contract test producer + consumer)
+pnpm smoke               31/31 đạt   (hạ tầng Docker thật)
 pnpm verify:idempotency  đạt
 Jaeger                   trace liền mạch qua 3 service
 ```

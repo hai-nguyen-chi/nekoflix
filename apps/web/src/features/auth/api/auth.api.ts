@@ -16,6 +16,15 @@ export const authApi = {
 
   logout: () => api.post<{ revoked: number }>('/v1/auth/logout', undefined, { skipAuth: true }),
 
+  /**
+   * `skipAuth` KHÔNG dùng ở đây, khác với `logout`.
+   *
+   * Đăng xuất một thiết bị chỉ cần cookie refresh. Thu hồi mọi thiết bị thì
+   * phải chứng minh đúng là chủ tài khoản — gateway lấy `userId` từ access
+   * token đã ký, không bao giờ từ body.
+   */
+  logoutAll: () => api.post<{ revoked: number }>('/v1/auth/logout-all'),
+
   verifyEmail: (token: string) =>
     api.post<{ user: PublicUser }>('/v1/auth/verify-email', { token }, { skipAuth: true }),
 

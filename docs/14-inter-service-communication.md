@@ -639,6 +639,23 @@ UPDATE_CONTRACT_SNAPSHOT=1 pnpm --filter @nekoflix/contracts test
 
 rồi commit snapshot cùng với thay đổi schema. **Diff của snapshot chính là thứ người review cần nhìn.**
 
+Vì lý do đó, `packages/contracts/test/snapshots/` nằm trong `.prettierignore`.
+File do `JSON.stringify` ghi ra; để Prettier định dạng lại thì mỗi lần cập nhật
+sinh ra hàng trăm dòng nhiễu và cái cần đọc chìm nghỉm trong đó.
+
+**Giới hạn cần biết:** công cụ không phân biệt chiều của RPC. Với _response_,
+thêm một field bắt buộc chỉ nguy hiểm theo một chiều — client MỚI gọi server CŨ
+sẽ nhận thiếu field và parse hỏng; client cũ gặp field lạ thì Zod cắt bỏ, không
+sao. Báo cáo gộp cả hai chiều thành một kết luận "PHÁ VỠ", nên khi nó đỏ ở một
+response schema, việc cần làm là tự hỏi _hai service này có deploy lệch nhau
+không_ rồi quyết định — chứ không phải cập nhật snapshot theo phản xạ.
+
+Ví dụ thật trong repo này: thêm `hasPassword` vào `listLinkedResponse` làm test
+đỏ. Gateway và identity-service ở đây luôn khởi động cùng nhau (một
+`docker compose`, một `pnpm dev:auth`), nên không có cửa sổ lệch phiên bản —
+snapshot được cập nhật có chủ ý. Trên hệ thống deploy cuốn chiếu thì câu trả lời
+sẽ là đánh dấu field đó `optional` thay vì cập nhật snapshot.
+
 Bản thân `checkBackwardCompatible` cũng có test riêng (`schema-shape.spec.ts`). Nếu nó hỏng theo hướng "luôn nói compatible", mọi test tương thích ngược khác sẽ xanh mãi mãi trong khi không kiểm tra gì cả — lưới an toàn cũng cần được kiểm tra.
 
 ### 8.5 Những gì contract test KHÔNG trả lời

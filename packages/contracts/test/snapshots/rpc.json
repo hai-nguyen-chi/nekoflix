@@ -91,7 +91,11 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["admin", "moderator", "user"]
+      "values": [
+        "admin",
+        "moderator",
+        "user"
+      ]
     }
   },
   "identity.auth.login#request": {
@@ -181,7 +185,11 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["admin", "moderator", "user"]
+      "values": [
+        "admin",
+        "moderator",
+        "user"
+      ]
     }
   },
   "identity.auth.refresh#request": {
@@ -299,7 +307,11 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["admin", "moderator", "user"]
+      "values": [
+        "admin",
+        "moderator",
+        "user"
+      ]
     }
   },
   "identity.user.get#request": {
@@ -344,7 +356,11 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["admin", "moderator", "user"]
+      "values": [
+        "admin",
+        "moderator",
+        "user"
+      ]
     }
   },
   "identity.session.list#request": {
@@ -443,13 +459,22 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["en", "vi"]
+      "values": [
+        "en",
+        "vi"
+      ]
     },
     "items[].maturityLimit": {
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
     },
     "items[].name": {
       "type": "string",
@@ -491,7 +516,10 @@
       "type": "enum",
       "optional": true,
       "nullable": false,
-      "values": ["en", "vi"]
+      "values": [
+        "en",
+        "vi"
+      ]
     },
     "name": {
       "type": "string<max,min,trim>",
@@ -544,13 +572,22 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["en", "vi"]
+      "values": [
+        "en",
+        "vi"
+      ]
     },
     "profile.maturityLimit": {
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
     },
     "profile.name": {
       "type": "string",
@@ -582,13 +619,22 @@
       "type": "enum",
       "optional": true,
       "nullable": false,
-      "values": ["en", "vi"]
+      "values": [
+        "en",
+        "vi"
+      ]
     },
     "maturityLimit": {
       "type": "enum",
       "optional": true,
       "nullable": false,
-      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
     },
     "name": {
       "type": "string<max,min,trim>",
@@ -641,13 +687,22 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["en", "vi"]
+      "values": [
+        "en",
+        "vi"
+      ]
     },
     "profile.maturityLimit": {
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
     },
     "profile.name": {
       "type": "string",
@@ -741,13 +796,22 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["en", "vi"]
+      "values": [
+        "en",
+        "vi"
+      ]
     },
     "profile.maturityLimit": {
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
     },
     "profile.name": {
       "type": "string",
@@ -850,13 +914,22 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["en", "vi"]
+      "values": [
+        "en",
+        "vi"
+      ]
     },
     "profile.maturityLimit": {
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["G", "NC-17", "PG", "PG-13", "R"]
+      "values": [
+        "G",
+        "NC-17",
+        "PG",
+        "PG-13",
+        "R"
+      ]
     },
     "profile.name": {
       "type": "string",
@@ -874,7 +947,10 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["github", "google"]
+      "values": [
+        "github",
+        "google"
+      ]
     },
     "redirectPath": {
       "type": "string<max,startsWith>",
@@ -919,7 +995,10 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["github", "google"]
+      "values": [
+        "github",
+        "google"
+      ]
     },
     "state": {
       "type": "string<min>",
@@ -1026,7 +1105,11 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["admin", "moderator", "user"]
+      "values": [
+        "admin",
+        "moderator",
+        "user"
+      ]
     }
   },
   "identity.oauth.listLinked#request": {
@@ -1038,6 +1121,11 @@
   },
   "identity.oauth.listLinked#response": {
     "canUnlink": {
+      "type": "boolean",
+      "optional": false,
+      "nullable": false
+    },
+    "hasPassword": {
       "type": "boolean",
       "optional": false,
       "nullable": false
@@ -1066,7 +1154,10 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["github", "google"]
+      "values": [
+        "github",
+        "google"
+      ]
     }
   },
   "identity.oauth.unlink#request": {
@@ -1074,7 +1165,10 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["github", "google"]
+      "values": [
+        "github",
+        "google"
+      ]
     },
     "userId": {
       "type": "string",
@@ -1180,7 +1274,11 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["admin", "moderator", "user"]
+      "values": [
+        "admin",
+        "moderator",
+        "user"
+      ]
     }
   },
   "identity.password.change#request": {

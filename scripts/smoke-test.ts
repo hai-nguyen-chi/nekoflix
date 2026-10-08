@@ -389,7 +389,101 @@ async function main(): Promise<void> {
     assert(ok2xx(r), `đăng nhập ĐÚNG bị chặn sau khi sai nhiều lần: ${errorCode(r)}`);
   });
 
-  // ── 8. Ranh giới database (chạy tay) ────────────────────────
+  // ── 8. Trang Tài khoản ──────────────────────────────────────
+  // Để CUỐI CÙNG vì nó đổi mật khẩu rồi thu hồi mọi phiên — chạy sớm hơn
+  // sẽ làm hỏng các mục phía trên.
+  console.log('\n8. Đổi mật khẩu và quản lý thiết bị');
+
+  const NEW_PASSWORD = 'MatkhauMoi456';
+
+  // Phiên thứ hai, giả làm một thiết bị khác
+  const other = await api('/v1/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password: PASSWORD }),
+    headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) Firefox/130.0' },
+  });
+  const otherAuth = { Authorization: `Bearer ${data<{ accessToken: string }>(other).accessToken}` };
+
+  await check('tài khoản tạo bằng email -> hasPassword = true', async () => {
+    // Giao diện dựa vào cờ này để chọn giữa "đổi mật khẩu" và "đặt mật
+    // khẩu". Trả sai thì tài khoản OAuth bị hỏi mật khẩu cũ mà họ không có.
+    const r = await api('/v1/auth/oauth', { headers: otherAuth });
+    const d = data<{ items: unknown[]; hasPassword: boolean; canUnlink: boolean }>(r);
+
+    assert(d.hasPassword === true, 'hasPassword phải là true');
+    assert(d.items.length === 0, 'chưa liên kết provider nào');
+  });
+
+  await check('đổi mật khẩu với mật khẩu cũ SAI -> INVALID_CREDENTIALS', async () => {
+    // Đã đăng nhập vẫn phải xác nhận mật khẩu cũ: thiếu bước này, ai mượn
+    // được máy lúc đang mở là chiếm luôn tài khoản.
+    const r = await api('/v1/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword: 'HoanToanSai123', newPassword: NEW_PASSWORD }),
+      headers: otherAuth,
+    });
+    assert(errorCode(r) === 'INVALID_CREDENTIALS', `mã sai: ${errorCode(r)}`);
+  });
+
+  await check('đổi mật khẩu -> thu hồi thiết bị KHÁC, giữ thiết bị hiện tại', async () => {
+    const r = await api('/v1/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword: PASSWORD, newPassword: NEW_PASSWORD }),
+      headers: otherAuth,
+    });
+    assert(ok2xx(r), `đổi mật khẩu thất bại: ${errorCode(r)}`);
+    assert(
+      data<{ revokedSessions: number }>(r).revokedSessions > 0,
+      'không thu hồi phiên nào — thiết bị cũ vẫn vào được bằng mật khẩu đã lộ',
+    );
+
+    // Người chủ động đổi mật khẩu không nên bị đá ra khỏi chính máy họ đang dùng
+    const still = await api('/v1/auth/sessions', { headers: otherAuth });
+    assert(ok2xx(still), `phiên hiện tại bị thu hồi oan: ${errorCode(still)}`);
+    assert(
+      data<{ items: unknown[] }>(still).items.length === 1,
+      'phải chỉ còn đúng một phiên — chính thiết bị này',
+    );
+  });
+
+  await check('mật khẩu CŨ không dùng được nữa', async () => {
+    const r = await api('/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password: PASSWORD }),
+    });
+    assert(errorCode(r) === 'INVALID_CREDENTIALS', `mã sai: ${errorCode(r)}`);
+  });
+
+  await check('người dùng được báo qua email', async () => {
+    await waitFor('email "Mật khẩu của bạn đã được thay đổi"', async () =>
+      (await inbox(email)).find((m) => m.Subject.includes('Mật khẩu của bạn')),
+    );
+  });
+
+  await check('logout-all thu hồi MỌI phiên, kể cả phiên gọi lệnh', async () => {
+    const fresh = await api('/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password: NEW_PASSWORD }),
+    });
+    assert(ok2xx(fresh), `đăng nhập bằng mật khẩu mới thất bại: ${errorCode(fresh)}`);
+    const freshCookie = refreshCookie(fresh.cookies);
+    const freshAuth = {
+      Authorization: `Bearer ${data<{ accessToken: string }>(fresh).accessToken}`,
+    };
+
+    const r = await api('/v1/auth/logout-all', { method: 'POST' }, undefined);
+    assert(r.status === 401, 'logout-all phải yêu cầu access token, không chỉ cookie');
+
+    const done = await api('/v1/auth/logout-all', { method: 'POST', headers: freshAuth });
+    assert(ok2xx(done), `logout-all thất bại: ${errorCode(done)}`);
+
+    // Refresh token của chính phiên vừa gọi cũng phải chết — nếu không,
+    // "đăng xuất mọi thiết bị" chừa lại đúng thiết bị đang bị chiếm.
+    const after = await api('/v1/auth/refresh', { method: 'POST' }, freshCookie);
+    assert(after.status === 401, `refresh vẫn sống sau logout-all: ${after.status}`);
+  });
+
+  // ── 9. Ranh giới database (chạy tay) ────────────────────────
   // Kiểm chứng ADR-012 ở tầng hạ tầng, không phải trên giấy. Cần docker
   // exec nên không gộp vào đây được:
   //

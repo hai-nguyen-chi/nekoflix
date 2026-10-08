@@ -5,6 +5,7 @@ import { generateKeyPairSync } from 'node:crypto';
 
 import { AuthService } from '../src/application/auth.service';
 import { OAuthService } from '../src/application/oauth.service';
+import { PasswordResetService } from '../src/application/password.service';
 import { PasswordService } from '../src/domain/password.service';
 import { TokenService } from '../src/domain/token.service';
 import { generatePkce } from '../src/domain/pkce';
@@ -60,6 +61,7 @@ let States: Model<OAuthState>;
 let Codes: Model<OAuthExchangeCode>;
 let auth: AuthService;
 let oauth: OAuthService;
+let passwordReset: PasswordResetService;
 let google: FakeProvider;
 const published: { type: string; data: Record<string, unknown> }[] = [];
 
@@ -120,6 +122,14 @@ beforeAll(async () => {
     Users,
     Sessions,
     Profiles,
+    Verifications,
+    passwords,
+    tokens,
+    outbox as never,
+  );
+  passwordReset = new PasswordResetService(
+    Users,
+    Sessions,
     Verifications,
     passwords,
     tokens,
@@ -353,6 +363,26 @@ describe('Gỡ liên kết', () => {
 
     const linked = await oauth.listLinked(user.id);
     expect(linked.canUnlink).toBe(false);
+    expect(linked.hasPassword).toBe(false);
+  });
+
+  it('hasPassword phản ánh đúng việc tài khoản có mật khẩu hay không', async () => {
+    // Giao diện dựa vào cờ này để quyết định hỏi hay KHÔNG hỏi mật khẩu
+    // hiện tại. Trả sai thì tài khoản OAuth bị hỏi một thứ họ không có,
+    // và không bao giờ đặt được mật khẩu.
+    const cb = await runOAuth();
+    const { user } = await oauth.exchange({ code: cb.exchangeCode, ctx: CTX });
+
+    expect((await oauth.listLinked(user.id)).hasPassword).toBe(false);
+
+    await passwordReset.change({
+      userId: user.id,
+      sessionId: 'khong-quan-trong',
+      newPassword: 'MatkhauMoi123',
+      ctx: CTX,
+    });
+
+    expect((await oauth.listLinked(user.id)).hasPassword).toBe(true);
   });
 
   it('gỡ được khi tài khoản đã có mật khẩu', async () => {

@@ -105,7 +105,11 @@
       "type": "enum",
       "optional": false,
       "nullable": false,
-      "values": ["all_sessions_revoked", "password_changed", "token_reuse_detected"]
+      "values": [
+        "all_sessions_revoked",
+        "password_changed",
+        "token_reuse_detected"
+      ]
     },
     "userAgent": {
       "type": "string",
