@@ -28,7 +28,7 @@ const TODO = '⬜';
 interface Feature {
   status: string;
   id: string;
-  /** Tên nhánh, hoặc SHA commit với Phase 0 và 1 */
+  /** SHA commit đã giao, hoặc `—` nếu chưa làm */
   ref: string;
   kind: string;
   what: string;
@@ -37,13 +37,16 @@ interface Phase {
   num: string;
   name: string;
   weeks: string;
+  /** Nhánh của cả phase — mỗi feature là một commit trên đó */
+  branch: string | null;
   features: Feature[];
 }
 
-/** `| ✅ | 2.1 | `feat/x` | 🟦 | làm gì | xong khi |` */
+/** `| ✅ | 2.1 | `921ed70` | 🟦 | làm gì | xong khi |` — cột 3 là `—` khi chưa làm */
 const ROW =
-  /^\|\s*(✅|🔄|⬜)\s*\|\s*(\d+\.[0-9A-Z])\s*\|\s*`([^`]+)`\s*\|\s*(\S+)\s*\|\s*([^|]+?)\s*\|/;
+  /^\|\s*(✅|🔄|⬜)\s*\|\s*(\d+\.[0-9A-Z])\s*\|\s*(`[^`]+`|—)\s*\|\s*(\S+)\s*\|\s*([^|]+?)\s*\|/;
 const HEADING = /^## (?:✅ )?Phase (\d+) — (.+?) \(([^)]+)\)/;
+const BRANCH = /^\*\*Nhánh\*\*: `([^`]+)`/;
 
 function parseRoadmap(): Phase[] {
   const phases: Phase[] = [];
@@ -52,8 +55,14 @@ function parseRoadmap(): Phase[] {
   for (const line of readFileSync(ROADMAP, 'utf8').split(/\r?\n/)) {
     const head = HEADING.exec(line);
     if (head) {
-      current = { num: head[1]!, name: head[2]!, weeks: head[3]!, features: [] };
+      current = { num: head[1]!, name: head[2]!, weeks: head[3]!, branch: null, features: [] };
       phases.push(current);
+      continue;
+    }
+
+    const branch = BRANCH.exec(line);
+    if (branch && current) {
+      current.branch = branch[1]!;
       continue;
     }
 
@@ -62,7 +71,7 @@ function parseRoadmap(): Phase[] {
       current.features.push({
         status: row[1]!,
         id: row[2]!,
-        ref: row[3]!,
+        ref: row[3]!.replace(/`/g, ''),
         kind: row[4]!,
         what: row[5]!,
       });
@@ -92,6 +101,7 @@ function main(): void {
   let total = 0;
   const wip: Feature[] = [];
   let next: Feature | null = null;
+  let nextPhase: Phase | null = null;
 
   console.log('\nTiến độ feature — nguồn: docs/11-roadmap.md\n');
 
@@ -110,9 +120,12 @@ function main(): void {
 
     for (const f of p.features) {
       if (f.status === WIP) wip.push(f);
-      else if (f.status === TODO && !next) next = f;
+      else if (f.status === TODO && !next) {
+        next = f;
+        nextPhase = p;
+      }
 
-      console.log(`   ${f.status} ${f.id.padEnd(4)} ${f.kind} ${f.ref.padEnd(34)} ${f.what}`);
+      console.log(`   ${f.status} ${f.id.padEnd(4)} ${f.kind} ${f.ref.padEnd(9)} ${f.what}`);
     }
     console.log();
   }
@@ -130,7 +143,21 @@ function main(): void {
   if (next) {
     console.log('  Feature kế tiếp:');
     console.log(`    ${next.id}  ${next.what}`);
-    console.log(`    git checkout develop && git pull && git checkout -b ${next.ref}\n`);
+
+    /**
+     * Một nhánh cho cả phase, không phải mỗi feature một nhánh. Nên nếu nhánh
+     * đã tồn tại thì chỉ cần `checkout`; chỉ lúc mở phase mới mới cắt nhánh.
+     */
+    const branch = nextPhase?.branch;
+    if (branch) {
+      console.log(`    nhánh của Phase ${nextPhase!.num}: ${branch}`);
+      console.log(`    git checkout ${branch} 2>/dev/null ||`);
+      console.log(`      git checkout develop && git pull && git checkout -b ${branch}`);
+    } else {
+      console.log(`    Phase ${nextPhase!.num} chưa ghi nhánh — thêm dòng`);
+      console.log('    **Nhánh**: `feat/<tên>` dưới tiêu đề phase trong roadmap.');
+    }
+    console.log();
   } else if (totalDone === total && total > 0) {
     console.log('  Hết feature trong roadmap.\n');
   }

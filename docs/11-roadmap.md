@@ -17,13 +17,13 @@ Trong mỗi phase, đơn vị công việc là **feature** — mỗi feature là
 
 ## Cách đọc bảng feature
 
-| Cột          | Nghĩa                                                                                                                             |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Xong**     | ✅ xong · 🔄 đang làm · ⬜ chưa đụng tới                                                                                          |
-| **#**        | Mã feature. Nên ghi trong commit message để dễ lần vết: `feat(catalog): ... (2.3)`                                                |
-| **Nhánh**    | Tên nhánh cắt từ `develop` — xem [17 §1](17-git-workflow.md). Phase 0 và 1 ghi **SHA commit** vì làm xong trước khi có quy ước mã |
-| **Làm gì**   | Phạm vi. Ngoài phạm vi là PR khác                                                                                                 |
-| **Xong khi** | Điều kiện kiểm chứng được, không phải cảm tính                                                                                    |
+| Cột          | Nghĩa                                                                                                                          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Xong**     | ✅ xong · 🔄 đang làm · ⬜ chưa đụng tới                                                                                       |
+| **#**        | Mã feature. Nên ghi trong commit message để dễ lần vết: `feat(catalog): ... (2.3)`                                             |
+| **Commit**   | SHA commit đã giao feature đó — `git show <sha>`. Nhánh ghi **dưới tiêu đề phase**: cả phase một nhánh, mỗi feature một commit |
+| **Làm gì**   | Phạm vi. Ngoài phạm vi là PR khác                                                                                              |
+| **Xong khi** | Điều kiện kiểm chứng được, không phải cảm tính                                                                                 |
 
 Merge xong một feature thì **tự đổi dấu ở cột Xong**. Đang làm dở để 🔄.
 
@@ -107,18 +107,21 @@ Tag `v0.1.0`.
 **Lần đầu**: gateway phải **ghép dữ liệu từ nhiều nguồn** và chịu được khi một nguồn
 chết.
 
-| Xong | #   | Nhánh                           | Loại | Làm gì                                                                        | Xong khi                                                   |
-| ---- | --- | ------------------------------- | ---- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| ✅   | 2.1 | `feat/catalog-skeleton`         | 🟦   | `pnpm new:service catalog 4002`, schema `titles` `genres` `episodes` `people` | `/health/ready` trả 200, `pnpm ci:local` xanh              |
-| ✅   | 2.2 | `feat/catalog-contracts`        | 🟦   | RPC + event schema trong `packages/contracts`, kèm `EVENT_FIXTURES`           | contract test xanh, snapshot commit **trong cùng PR**      |
-| ⬜   | 2.3 | `feat/catalog-read-api`         | 🟦   | `list`, `detail`, `byIds` (batch), `episodes`                                 | gọi qua NATS trả đúng dữ liệu                              |
-| ⬜   | 2.4 | `feat/catalog-seed`             | 🟦   | `scripts/seed/seeds/catalog.seed.ts` — 20 title + episodes                    | `pnpm db:seed` ra kết quả **tất định** trên mọi máy        |
-| ⬜   | 2.5 | `feat/catalog-search`           | 🟦   | Text index + bỏ dấu tiếng Việt                                                | tìm `bo gia` ra `Bố Già`                                   |
-| ⬜   | 2.6 | `feat/catalog-cache`            | 🟦   | Cache Redis + invalidate qua event `catalog.title.updated`                    | sửa title → lần gọi kế tiếp thấy ngay, không chờ TTL       |
-| ⬜   | 2.7 | `feat/gateway-home-composition` | 🟩   | `/v1/catalog/home` ghép nhiều nguồn + circuit breaker + fallback              | **tắt catalog → gateway trả 503 có thông báo, không treo** |
-| ⬜   | 2.8 | `feat/web-browse`               | 🟩   | Trang Browse (rows) + TitleDetail                                             | `/browse` hiện đủ row, click ra trang chi tiết             |
-| ⬜   | 2.9 | `feat/web-search`               | 🟨   | Ô tìm kiếm + trang kết quả + trạng thái rỗng                                  | gõ không dấu vẫn ra kết quả                                |
-| ⬜   | 2.A | `feat/catalog-admin`            | 🟩   | Admin CRUD + import TMDB                                                      | thêm title ở admin → FE thấy sau khi cache bị invalidate   |
+**Nhánh**: `feat/catalog` — cắt từ `develop`, mỗi feature dưới đây là một commit
+trên nhánh đó, PR mở khi hết phase. Xem [17 §1](17-git-workflow.md).
+
+| Xong | #   | Commit    | Loại | Làm gì                                                                        | Xong khi                                                   |
+| ---- | --- | --------- | ---- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| ✅   | 2.1 | `921ed70` | 🟦   | `pnpm new:service catalog 4002`, schema `titles` `genres` `episodes` `people` | `/health/ready` trả 200, `pnpm ci:local` xanh              |
+| ✅   | 2.2 | `2a5d4d7` | 🟦   | RPC + event schema trong `packages/contracts`, kèm `EVENT_FIXTURES`           | contract test xanh, snapshot commit **trong cùng PR**      |
+| ✅   | 2.3 | `4a8fb4e` | 🟦   | `list`, `detail`, `byIds` (batch), `episodes`                                 | gọi qua NATS trả đúng dữ liệu                              |
+| ⬜   | 2.4 | —         | 🟦   | `scripts/seed/seeds/catalog.seed.ts` — 20 title + episodes                    | `pnpm db:seed` ra kết quả **tất định** trên mọi máy        |
+| ⬜   | 2.5 | —         | 🟦   | Text index + bỏ dấu tiếng Việt                                                | tìm `bo gia` ra `Bố Già`                                   |
+| ⬜   | 2.6 | —         | 🟦   | Cache Redis + invalidate qua event `catalog.title.updated`                    | sửa title → lần gọi kế tiếp thấy ngay, không chờ TTL       |
+| ⬜   | 2.7 | —         | 🟩   | `/v1/catalog/home` ghép nhiều nguồn + circuit breaker + fallback              | **tắt catalog → gateway trả 503 có thông báo, không treo** |
+| ⬜   | 2.8 | —         | 🟩   | Trang Browse (rows) + TitleDetail                                             | `/browse` hiện đủ row, click ra trang chi tiết             |
+| ⬜   | 2.9 | —         | 🟨   | Ô tìm kiếm + trang kết quả + trạng thái rỗng                                  | gõ không dấu vẫn ra kết quả                                |
+| ⬜   | 2.A | —         | 🟩   | Admin CRUD + import TMDB                                                      | thêm title ở admin → FE thấy sau khi cache bị invalidate   |
 
 > **2.2 trước 2.3** là có chủ đích: viết hợp đồng trước, cài sau. Làm ngược lại thì
 > schema bị uốn theo cách cài đặt tình cờ.
