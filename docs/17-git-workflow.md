@@ -26,18 +26,39 @@ master ────────────────────────�
 
 ---
 
-## 1. Làm một tính năng
+## 1. Làm một phase
+
+**Một phase là một nhánh, mỗi feature trong phase là một commit.**
+
+Tên nhánh ghi sẵn dưới tiêu đề mỗi phase trong [11 — Roadmap](11-roadmap.md);
+`pnpm progress` in ra lệnh cần gõ.
 
 ```bash
 # LUÔN cắt từ develop, và luôn kéo mới trước
 git checkout develop
 git pull
 
-git checkout -b feat/catalog-service
+git checkout -b feat/catalog        # cả Phase 2 nằm trên nhánh này
 ```
 
-Tên nhánh lấy từ bảng feature trong [11 — Roadmap](11-roadmap.md); `pnpm progress`
-in sẵn lệnh `git checkout -b` cho feature kế tiếp.
+Rồi làm từng feature, mỗi feature một commit:
+
+```bash
+# ... làm 2.3 ...
+pnpm ci:local
+git commit -m "feat(catalog): list, detail, byIds, episodes (2.3)"
+
+# ... làm 2.4 ...
+pnpm ci:local
+git commit -m "feat(catalog): seed 20 title tất định (2.4)"
+```
+
+Mở PR khi **hết phase**, hoặc sớm hơn nếu phase kéo dài và muốn `develop` nhận
+sớm phần đã chạy được.
+
+> **Mỗi commit vẫn phải để cây build được.** Commit giữa chừng mà `pnpm ci:local`
+> đỏ thì `git bisect` sau này vô dụng, và không tách ra được nếu cần bỏ một
+> feature khỏi phase.
 
 Tiền tố quyết định nhánh được merge vào đâu — CI chặn nếu sai:
 
@@ -66,19 +87,21 @@ sau khi xoá hoặc đổi tên một service mà quên chạy lại `pnpm insta
 chạy ở máy vẫn bình thường vì `node_modules` đã có sẵn, nhưng CI cài từ đầu thì đỏ
 ngay.
 
-### Xong rồi thì đánh dấu
+### Xong một feature thì đánh dấu
 
-Sau khi PR merge vào `develop`, mở [11 — Roadmap](11-roadmap.md) và đổi cột **Xong**
-của feature đó từ ⬜ sang ✅. `pnpm progress` đọc chính cột đó.
+Mở [11 — Roadmap](11-roadmap.md), đổi cột **Xong** của feature đó từ ⬜ sang ✅ và
+điền **SHA commit** vào cột Commit. `pnpm progress` đọc đúng hai cột đó.
 
-Đang làm dở thì để 🔄 — `pnpm progress` sẽ liệt kê riêng.
+Đang làm dở thì để 🔄 — `pnpm progress` liệt kê riêng.
 
-Mã feature trong commit message (`feat(catalog): ... (2.5)`) vẫn nên ghi để dễ lần
-vết, nhưng nó **không** quyết định trạng thái.
+Mã feature trong commit message (`... (2.5)`) không quyết định trạng thái, nhưng
+vẫn nên ghi: nó là thứ nối commit với dòng trong roadmap.
 
 ### Nhánh sống lâu thì phải đồng bộ
 
-Nhánh để cả tuần sẽ lệch xa `develop`, và lúc merge mới phát hiện xung đột chồng chất:
+Nhánh của một phase sống 1.5–3 tuần. Ở dự án một người thì `develop` gần như đứng
+yên trong lúc đó nên ít xung đột, nhưng vẫn nên kéo về định kỳ — nhất là sau khi
+merge một PR sửa hạ tầng hoặc tài liệu:
 
 ```bash
 git checkout develop && git pull

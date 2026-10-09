@@ -271,10 +271,10 @@ Database **không** đi theo Git. Quy trình:
 ```bash
 # Máy A — trước khi rời
 git add -A && git commit -m "..."
-git push -u origin feat/<tên-nhánh>
+git push -u origin feat/<phase>
 
 # Máy B
-git fetch && git checkout feat/<tên-nhánh>
+git fetch && git checkout feat/<phase>
 pnpm install          # nếu package.json đổi
 pnpm build
 pnpm infra:up
