@@ -1,2 +1,0 @@
-Biên NATS của service: @MessagePattern.
-Parse payload -> gọi domain -> trả kết quả. KHÔNG chứa business logic.

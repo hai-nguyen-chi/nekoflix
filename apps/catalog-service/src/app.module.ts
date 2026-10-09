@@ -5,6 +5,10 @@ import { Title, TitleSchema } from './persistence/schemas/title.schema';
 import { Episode, EpisodeSchema } from './persistence/schemas/episode.schema';
 import { Genre, GenreSchema } from './persistence/schemas/genre.schema';
 import { Person, PersonSchema } from './persistence/schemas/person.schema';
+import { TitleController } from './api/title.controller';
+import { EpisodeController } from './api/episode.controller';
+import { TitleService } from './application/title.service';
+import { EpisodeService } from './application/episode.service';
 
 @Module({
   imports: [
@@ -31,7 +35,7 @@ import { Person, PersonSchema } from './persistence/schemas/person.schema';
       { name: Person.name, schema: PersonSchema },
     ]),
   ],
-  controllers: [],
-  providers: [],
+  controllers: [TitleController, EpisodeController],
+  providers: [TitleService, EpisodeService],
 })
 export class AppModule {}

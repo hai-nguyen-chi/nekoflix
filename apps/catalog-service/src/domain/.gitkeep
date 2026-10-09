@@ -1,3 +1,0 @@
-Toàn bộ business logic. KHÔNG biết NATS, KHÔNG biết Mongoose.
-Đây là nơi dễ test nhất và chứa giá trị thật của service.
-ESLint chặn import @nestjs/microservices, mongoose, nats ở thư mục này.
