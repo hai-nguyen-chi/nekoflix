@@ -4,8 +4,11 @@
  *   pnpm progress
  *
  * Đọc cột **Xong** trong bảng feature của `docs/11-roadmap.md`. Làm xong một
- * feature thì tự tay đổi ⬜ thành ✅ trong bảng đó — script chỉ tổng hợp lại
- * và chỉ ra việc kế tiếp.
+ * feature thì tự tay đổi ⬜ thành ✅ và điền SHA commit vào cột Commit —
+ * script chỉ tổng hợp lại và chỉ ra việc kế tiếp.
+ *
+ * Một PHASE là một nhánh, mỗi feature trong phase là một commit. Tên nhánh
+ * ghi ngay dưới tiêu đề phase trong roadmap.
  *
  * Bản trước suy trạng thái từ lịch sử git bằng cách tìm mã feature trong
  * commit message. Nghe thì chặt hơn, nhưng nó thêm được một kiểu sai mới:
@@ -28,8 +31,8 @@ const TODO = '⬜';
 interface Feature {
   status: string;
   id: string;
-  /** Tên nhánh, hoặc SHA commit với Phase 0 và 1 */
-  ref: string;
+  /** SHA commit đã giao feature, hoặc `—` khi chưa làm */
+  commit: string;
   kind: string;
   what: string;
 }
@@ -37,13 +40,16 @@ interface Phase {
   num: string;
   name: string;
   weeks: string;
+  /** Nhánh của cả phase. Rỗng với phase đã xong từ trước. */
+  branch: string;
   features: Feature[];
 }
 
-/** `| ✅ | 2.1 | `feat/x` | 🟦 | làm gì | xong khi |` */
+/** `| ✅ | 2.1 | `921ed70` | 🟦 | làm gì | xong khi |` — cột 3 là `—` khi chưa làm */
 const ROW =
-  /^\|\s*(✅|🔄|⬜)\s*\|\s*(\d+\.[0-9A-Z])\s*\|\s*`([^`]+)`\s*\|\s*(\S+)\s*\|\s*([^|]+?)\s*\|/;
+  /^\|\s*(✅|🔄|⬜)\s*\|\s*(\d+\.[0-9A-Z])\s*\|\s*(`[^`]+`|—)\s*\|\s*(\S+)\s*\|\s*([^|]+?)\s*\|/;
 const HEADING = /^## (?:✅ )?Phase (\d+) — (.+?) \(([^)]+)\)/;
+const BRANCH_LINE = /^\*\*Nhánh\*\*: `([^`]+)`/;
 
 function parseRoadmap(): Phase[] {
   const phases: Phase[] = [];
@@ -52,8 +58,14 @@ function parseRoadmap(): Phase[] {
   for (const line of readFileSync(ROADMAP, 'utf8').split(/\r?\n/)) {
     const head = HEADING.exec(line);
     if (head) {
-      current = { num: head[1]!, name: head[2]!, weeks: head[3]!, features: [] };
+      current = { num: head[1]!, name: head[2]!, weeks: head[3]!, branch: '', features: [] };
       phases.push(current);
+      continue;
+    }
+
+    const br = BRANCH_LINE.exec(line);
+    if (br && current) {
+      current.branch = br[1]!;
       continue;
     }
 
@@ -62,7 +74,7 @@ function parseRoadmap(): Phase[] {
       current.features.push({
         status: row[1]!,
         id: row[2]!,
-        ref: row[3]!,
+        commit: row[3]!.replace(/`/g, ''),
         kind: row[4]!,
         what: row[5]!,
       });
@@ -112,7 +124,7 @@ function main(): void {
       if (f.status === WIP) wip.push(f);
       else if (f.status === TODO && !next) next = f;
 
-      console.log(`   ${f.status} ${f.id.padEnd(4)} ${f.kind} ${f.ref.padEnd(34)} ${f.what}`);
+      console.log(`   ${f.status} ${f.id.padEnd(4)} ${f.kind} ${f.commit.padEnd(9)} ${f.what}`);
     }
     console.log();
   }
@@ -123,20 +135,26 @@ function main(): void {
 
   if (wip.length) {
     console.log('  Đang làm:');
-    for (const f of wip) console.log(`    ${f.id}  ${f.ref}`);
+    for (const f of wip) console.log(`    ${f.id}  ${f.what}`);
     console.log();
   }
 
   if (next) {
+    const phase = phases.find((p) => p.features.includes(next!));
     console.log('  Feature kế tiếp:');
     console.log(`    ${next.id}  ${next.what}`);
-    console.log(`    git checkout develop && git pull && git checkout -b ${next.ref}\n`);
+    if (phase?.branch) {
+      console.log(`\n  Cả phase ${phase.num} nằm trên nhánh ${phase.branch}:`);
+      console.log(`    git checkout ${phase.branch} \\`);
+      console.log(`      || (git checkout develop && git pull && git checkout -b ${phase.branch})`);
+    }
+    console.log();
   } else if (totalDone === total && total > 0) {
     console.log('  Hết feature trong roadmap.\n');
   }
 
-  console.log('  Xong một feature thì đổi ⬜ -> ✅ ở cột Xong trong docs/11-roadmap.md');
-  console.log('  (dùng 🔄 cho feature đang làm dở).\n');
+  console.log('  Xong một feature thì đổi ⬜ -> ✅ và điền SHA vào cột Commit');
+  console.log('  trong docs/11-roadmap.md (dùng 🔄 cho feature đang làm dở).\n');
 }
 
 main();

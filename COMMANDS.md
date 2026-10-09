@@ -24,7 +24,7 @@ pnpm format                      # tự sửa định dạng
 pnpm infra:down                  # tắt container, giữ dữ liệu
 pnpm infra:reset                 # tắt + XOÁ SẠCH dữ liệu
 
-git checkout develop && git pull && git checkout -b feat/<tên>
+git checkout develop && git pull && git checkout -b feat/<phase>
 ```
 
 ---
@@ -65,18 +65,26 @@ feat/*  →  develop  →  staging  →  master
 `develop`, `staging`, `master` **không push thẳng được** — ruleset chặn. Mọi thay
 đổi đi qua Pull Request.
 
-### Làm một tính năng
+### Làm một phase
+
+**Một phase là một nhánh, mỗi feature là một commit.** Tên nhánh ghi sẵn dưới tiêu đề
+phase trong [docs/11](docs/11-roadmap.md); `pnpm progress` in ra lệnh cần gõ.
 
 ```bash
 git checkout develop && git pull
-git checkout -b feat/catalog-service
+git checkout -b feat/catalog               # cả Phase 2 nằm đây
 
-# ... code ...
+# ... làm feature 2.3 ...
+pnpm ci:local                              # BẮT BUỘC trước mỗi commit
+git commit -m "feat(catalog): list, detail, byIds, episodes (2.3)"
 
-pnpm ci:local                              # BẮT BUỘC trước khi push
-git push -u origin feat/catalog-service
-# rồi mở PR trên GitHub, base = develop
+# ... làm 2.4, 2.5, ... mỗi cái một commit ...
+
+git push -u origin feat/catalog
+# mở PR khi hết phase, base = develop
 ```
+
+Xong một feature thì đổi ⬜ → ✅ và điền SHA vào cột Commit trong `docs/11-roadmap.md`.
 
 Tiền tố nhánh (CI chặn nếu sai): `feat/` `fix/` `refactor/` `chore/` `docs/` `test/`
 
@@ -141,11 +149,11 @@ git reset --hard origin/develop        # dọn lại
 ```bash
 # ── Máy A, trước khi rời ──
 git add -A && git commit -m "wip: ..."
-git push -u origin feat/<tên-nhánh>     # đẩy cả nhánh dở dang cũng không sao
+git push -u origin feat/<phase>         # đẩy cả nhánh dở dang cũng không sao
 
 # ── Máy B ──
 git fetch
-git checkout feat/<tên-nhánh>
+git checkout feat/<phase>
 pnpm install           # nếu package.json đổi
 pnpm build
 pnpm infra:up
